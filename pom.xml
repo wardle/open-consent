@@ -12,9 +12,42 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<main.class>com.eldrix.openconsent.Application</main.class>
+		
 	</properties>
+	<parent>
+		<groupId>io.bootique.parent</groupId>
+		<artifactId>bootique-parent</artifactId>
+		<version>0.12</version>
+	</parent>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.bootique.bom</groupId>
+				<artifactId>bootique-bom</artifactId>
+				<version>0.21</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>io.bootique.jersey</groupId>
+			<artifactId>bootique-jersey</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.bootique.logback</groupId>
+			<artifactId>bootique-logback</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.bootique.flyway</groupId>
+			<artifactId>bootique-flyway</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
@@ -23,8 +56,16 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>
