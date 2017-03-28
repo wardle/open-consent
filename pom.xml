@@ -13,7 +13,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<main.class>com.eldrix.openconsent.Application</main.class>
-		
+
 	</properties>
 	<parent>
 		<groupId>io.bootique.parent</groupId>
@@ -48,6 +48,13 @@
 			<groupId>io.bootique.flyway</groupId>
 			<artifactId>bootique-flyway</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.0.0</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>

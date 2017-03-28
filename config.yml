@@ -1,0 +1,15 @@
+jdbc:
+  postgres:
+    url: jdbc:postgresql:openconsent
+    driverClassName: org.postgresql.Driver
+    initialSize: 10
+
+cayenne:
+  datasource: postgres
+  createSchema: false
+
+flyway:
+  locations:
+    - db/migration
+  dataSources:
+    - postgres
