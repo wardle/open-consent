@@ -51,5 +51,5 @@
 	<db-relationship name="episodes" source="t_project" target="t_episode" toMany="true">
 		<db-attribute-pair source="id" target="project_fk"/>
 	</db-relationship>
-	<obj-relationship name="project" source="Episode" target="Episode" deleteRule="Deny" db-relationship-path="project.episodes"/>
+	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Deny" db-relationship-path="project"/>
 </data-map>
