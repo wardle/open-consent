@@ -46,6 +46,9 @@ public class SimpleTests {
 	@Test
 	public void testPatients() {
 		ObjectContext context = getRuntime().newContext();
+		
+		
+		// create some example patients
 		final String email = "wibble@wobble.com";
 		final String password1 = "password";
 		final String password2 = "p455w0rd";
@@ -66,10 +69,16 @@ public class SimpleTests {
 			assertEquals(e, spt.getEmail());
 		}
 		context.commitChanges();
+		
+		// try to fetch from the database as a user login
 		SecurePatient sp1 = SecurePatient.performLogin(context, email, password2);
 		assertNotNull(sp1);
 		SecurePatient sp2 = SecurePatient.performLogin(context, email, password1);
 		assertNull(sp2);
+		
+		
+		
+		// and now let's delete these patients...		
 		for (SecurePatient sp : patients) {
 			context.deleteObject(sp.getPatient());
 		}
