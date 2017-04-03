@@ -87,10 +87,24 @@ public class SimpleTests {
 		// test project registration for a patient. Here, the service knows the NNN and date of birth.
 		Episode episode = project.registerPatientToProject(context, "1111111111", LocalDate.of(1975, 1, 1));
 
-		// and now can our patient find their registration?
+		// and now link episode to a patient registration
+		Registration registration = sp1.createRegistrationForEpisode(episode, "1111111111", LocalDate.of(1975, 1, 1));
+		assertNotEquals(registration.getEncryptedIdentifier(), episode.getPatientIdentifier());
+		context.commitChanges();
 		
-				
+		// and now, can we find this registration?
+		assertTrue(sp1.getRegisteredEpisodes().stream().anyMatch(e -> e.getPatientIdentifier() == episode.getPatientIdentifier()));
+		
+		// check that can't register when using incorrect data
+		try {
+			sp1.createRegistrationForEpisode(episode, "222222222", LocalDate.of(1975, 1, 1));
+			assertTrue(false);			
+		} catch (IllegalArgumentException e) {
+			assertTrue(true);
+		}
+		
 		// and now clean-up
+		context.deleteObject(registration);
 		context.deleteObject(episode);
 		for (SecurePatient sp : patients) {
 			context.deleteObject(sp.getPatient());

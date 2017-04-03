@@ -16,7 +16,7 @@ public class Project extends _Project {
     private static final long serialVersionUID = 1L; 
 
     private Pseudonymizer _pseudonymizer;
-    
+        
     @Override
     protected void onPostAdd() {
     	setUuid(java.util.UUID.randomUUID().toString());
@@ -48,7 +48,8 @@ public class Project extends _Project {
      * @param pseudonym
      * @return
      */
-    public Episode registerPatientToProject(ObjectContext context, String pseudonym) {
+    public Episode registerPatientToProject(ObjectContext context, String identifier, LocalDate dateBirth) {
+    	String pseudonym = calculatePseudonym(identifier, dateBirth);
     	Expression e1 = Episode.PATIENT_IDENTIFIER.eq(pseudonym);
     	Expression e2 = Episode.PROJECT.eq(this);
     	List<Ordering> ordering = Episode.DATE_REGISTRATION.descs();
@@ -58,20 +59,10 @@ public class Project extends _Project {
     		result = context.newObject(Episode.class);
     		result.setProject(this);
     		result.setDateRegistration(LocalDate.now());
+    		result.setPatientIdentifier(pseudonym);
     	} else {
     		result = episodes.get(0);
     	}
     	return result;
-    }
-    
-    /**
-     * Register a patient to this project / service.
-     * If the patient is already registered, the current registration will be returned.
-     * @param identifier
-     * @param dateBirth
-     * @return
-     */
-    public Episode registerPatientToProject(ObjectContext context, String identifier, LocalDate dateBirth) {
-    	return registerPatientToProject(context, calculatePseudonym(identifier, dateBirth));
     }
 }

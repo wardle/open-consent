@@ -1,10 +1,13 @@
 package com.eldrix.openconsent.model;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -35,7 +38,7 @@ public final class SecurePatient {
 	private final byte[] _encryptionKey;
 	private static PasswordService _passwordService = new DefaultPasswordService();	// thread-safe
 	private static AesCipherService _cipherService = new AesCipherService();	// thread-safe
-	
+
 	private SecurePatient(Patient pt, String password, boolean isNew) {
 		_patient = Objects.requireNonNull(pt);
 		Objects.requireNonNull(password);
@@ -46,7 +49,7 @@ public final class SecurePatient {
 			_encryptionKey = decryptEncryptionKey(pt.getEncryptedEncryptionKey(), password);
 		}		
 	}
-	
+
 	private static byte[] decryptEncryptionKey(String key, String password) {
 		byte[] encryptionKeyKey = new Md5Hash(password).getBytes();	// MD5 generates a 32 character digest
 		return _cipherService.decrypt(Base64.decode(key), encryptionKeyKey).getBytes();		
@@ -55,14 +58,14 @@ public final class SecurePatient {
 		byte[] encryptionKeyKey = new Md5Hash(password).getBytes();	// MD5 generates a 32 character digest
 		return _cipherService.encrypt(key, encryptionKeyKey).toBase64();
 	}
-	
+
 	private String encrypt(String data) {
 		return _cipherService.encrypt(CodecSupport.toBytes(data), _encryptionKey).toBase64();
 	}
 	private String decrypt(String data) {
 		return CodecSupport.toString(_cipherService.decrypt(Base64.decode(data), _encryptionKey).getBytes());
 	}
-	
+
 	/**
 	 * Return the encrypted patient.
 	 * @return
@@ -70,7 +73,7 @@ public final class SecurePatient {
 	public Patient getPatient() {
 		return _patient;
 	}
-	
+
 	/**
 	 * Perform a login using the email address and password specified.
 	 * @param context
@@ -88,11 +91,11 @@ public final class SecurePatient {
 		}
 		return null;
 	}
-	
+
 	public boolean passwordMatches(String password) {
 		return _passwordService.passwordsMatch(password, getPatient().getHashedPassword());
 	}
-	
+
 	/**
 	 * Change the patient's password.
 	 * @param newPassword
@@ -100,7 +103,7 @@ public final class SecurePatient {
 	public void setPassword(String newPassword) {
 		changePassword(getPatient(), newPassword);
 	}
-	
+
 	private void changePassword(Patient pt, String newPassword) {
 		pt.setHashedPassword(_passwordService.encryptPassword(newPassword));
 		pt.setEncryptedEncryptionKey(encryptEncryptionKey(_encryptionKey, newPassword));
@@ -124,7 +127,7 @@ public final class SecurePatient {
 	public String getName() {
 		return decrypt(getPatient().getEncryptedName());
 	}
-	
+
 	/**
 	 * Set the email, automatically encrypting using the given encryption key and generating
 	 * a salted digest so that the email can be looked up again.
@@ -143,9 +146,36 @@ public final class SecurePatient {
 	public String getEmail() {
 		return decrypt(getPatient().getEncryptedEmail());
 	}
-	
-	public List<Project> registeredProjects() {
-		return Collections.emptyList();
+
+	/**
+	 * Create a registration for the specified episode.
+	 * @param episode
+	 * @return
+	 */
+	public Registration createRegistrationForEpisode(Episode episode, String identifier, LocalDate dateBirth) {
+		String pseudonym1 = episode.getPatientIdentifier();
+		String pseudonym2 = episode.getProject().calculatePseudonym(identifier, dateBirth);
+		if (pseudonym1.equals(pseudonym2) == false) {
+			throw new IllegalArgumentException("Episode pseudonym does not match patient's details");
+		}
+		String encrypted = encrypt(pseudonym1);
+		Registration reg = episode.getObjectContext().newObject(Registration.class);
+		reg.setPatient(getPatient());
+		reg.setEncryptedIdentifier(encrypted);
+		return reg;
+	}
+
+	/**
+	 * Return a list of episodes for this patient by decrypting the episode
+	 * pseudonymous identifiers from the registrations.
+	 * @return
+	 */
+	public List<Episode> getRegisteredEpisodes() {
+		List<String> ids = getPatient().getRegistrations().stream()
+			.map(Registration::getEncryptedIdentifier)
+			.map(eid -> decrypt(eid)).collect(Collectors.toList());
+		Expression qual = Episode.PATIENT_IDENTIFIER.in(ids);
+		return ObjectSelect.query(Episode.class, qual).select(getPatient().getObjectContext());
 	}
 
 	/**
@@ -155,7 +185,7 @@ public final class SecurePatient {
 	public static Builder getBuilder() {
 		return new Builder();
 	}
-	
+
 	public final static class Builder {
 		private String _email;
 		private String _name;
@@ -172,7 +202,7 @@ public final class SecurePatient {
 			_name = name;
 			return this;
 		}
-		
+
 		public SecurePatient build(ObjectContext context) {
 			Objects.requireNonNull(_email);
 			Objects.requireNonNull(_name);

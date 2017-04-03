@@ -26,6 +26,10 @@
 		<db-attribute name="title" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
+	<db-entity name="t_registration" schema="public">
+		<db-attribute name="encrypted_identifier" type="LONGVARCHAR" isMandatory="true"/>
+		<db-attribute name="patient_fk" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<obj-entity name="Episode" className="com.eldrix.openconsent.model.Episode" dbEntityName="t_episode">
 		<obj-attribute name="dateRegistration" type="java.time.LocalDate" db-attribute-path="date_registration"/>
 		<obj-attribute name="patientIdentifier" type="java.lang.String" db-attribute-path="patient_identifier"/>
@@ -44,11 +48,22 @@
 		<post-add method-name="onPostAdd"/>
 		<post-load method-name="onPostLoad"/>
 	</obj-entity>
+	<obj-entity name="Registration" className="com.eldrix.openconsent.model.Registration" lock-type="optimistic" dbEntityName="t_registration">
+		<obj-attribute name="encryptedIdentifier" type="java.lang.String" db-attribute-path="encrypted_identifier"/>
+	</obj-entity>
 	<db-relationship name="project" source="t_episode" target="t_project" toMany="false">
 		<db-attribute-pair source="project_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="registrations" source="t_patient" target="t_registration" toDependentPK="true" toMany="true">
+		<db-attribute-pair source="id" target="patient_fk"/>
 	</db-relationship>
 	<db-relationship name="episodes" source="t_project" target="t_episode" toMany="true">
 		<db-attribute-pair source="id" target="project_fk"/>
 	</db-relationship>
+	<db-relationship name="patient" source="t_registration" target="t_patient" toMany="false">
+		<db-attribute-pair source="patient_fk" target="id"/>
+	</db-relationship>
 	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
+	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Deny" db-relationship-path="registrations"/>
+	<obj-relationship name="patient" source="Registration" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 </data-map>
