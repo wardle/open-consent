@@ -10,7 +10,7 @@ Essentially, clinical services and research projects can lookup patients using t
 - patient identifier (for example, NHS number for projects based in the UK)
 - date of birth
 
-A service or project passes these to the web-service to understand to what the patient has consented as well as the project-specific pseudonym which can be used to lookup the patient in the future, if required. The patient-identifiable information is held transiently in computer memory until they are combined to create, unique for that project or service, a pseudonym.
+A service or project passes these to the web-service to understand whether the patient has consented as well as the project-specific pseudonym which can be used to lookup the patient in the future, if required. The patient-identifiable information is held transiently in computer memory until they are combined to create, unique for that project or service, a pseudonym.
 
 ## For patients
 
@@ -26,9 +26,9 @@ A patient can directly change the permissions and consent for access for all or 
 
 Information about registration and consent to different services is sensitive information. If a patient has a registration to a known HIV service by virtue of a join table in a relational database then the OpenConsent service, if hacked, would leak information about all patients known to that service.
 
-However, instead of using a simple relational join-table, each patient has a list of registrations which simply contain a pseudonymous identifier and an encrypted description of that service.
+However, instead of using a simple relational join-table, each patient has a list of encrypted registrations.
 
-Permissions and consent are related to that registration information. Even if the service is hacked, it is not possible to find all patients known to a particular service and while one could determine to how many clinical services an individual account is linked, no other information would be available.
+Permissions and consent are related to that registration information. Even if the service is hacked, it is not possible to find all patients known to a particular service.
 
 
 ## For developers
