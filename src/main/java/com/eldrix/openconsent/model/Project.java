@@ -1,6 +1,13 @@
 package com.eldrix.openconsent.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.apache.cayenne.ObjectContext;
+import org.apache.cayenne.exp.Expression;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.Ordering;
 
 import com.eldrix.openconsent.core.Pseudonymizer;
 import com.eldrix.openconsent.model.auto._Project;
@@ -30,5 +37,41 @@ public class Project extends _Project {
     
     public String calculatePseudonym(String identifier, LocalDate dateBirth) {
     	return pseudonymizer().calculatePseudonym(identifier, dateBirth);
+    }
+
+    /**
+     * Register a patient to this project / service.
+     * If the patient is already registered, the current registration will be returned.
+     * 
+     * TODO: currently, we do not record a discharge date or removal of consent. 
+     * 
+     * @param pseudonym
+     * @return
+     */
+    public Episode registerPatientToProject(ObjectContext context, String pseudonym) {
+    	Expression e1 = Episode.PATIENT_IDENTIFIER.eq(pseudonym);
+    	Expression e2 = Episode.PROJECT.eq(this);
+    	List<Ordering> ordering = Episode.DATE_REGISTRATION.descs();
+    	List<Episode> episodes = ObjectSelect.query(Episode.class, e1.andExp(e2), ordering).select(context);
+    	Episode result;
+    	if (episodes.isEmpty()) {
+    		result = context.newObject(Episode.class);
+    		result.setProject(this);
+    		result.setDateRegistration(LocalDate.now());
+    	} else {
+    		result = episodes.get(0);
+    	}
+    	return result;
+    }
+    
+    /**
+     * Register a patient to this project / service.
+     * If the patient is already registered, the current registration will be returned.
+     * @param identifier
+     * @param dateBirth
+     * @return
+     */
+    public Episode registerPatientToProject(ObjectContext context, String identifier, LocalDate dateBirth) {
+    	return registerPatientToProject(context, calculatePseudonym(identifier, dateBirth));
     }
 }

@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.SelectQuery;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -47,6 +49,12 @@ public class SimpleTests {
 	public void testPatients() {
 		ObjectContext context = getRuntime().newContext();
 		
+		// create a pretend project
+		Project project = context.newObject(Project.class);
+		project.setTitle("A simple test project");
+
+		context.commitChanges();
+
 		
 		// create some example patients
 		final String email = "wibble@wobble.com";
@@ -54,7 +62,7 @@ public class SimpleTests {
 		final String password2 = "p455w0rd";
 		final String name = "John Smith";
 		List<SecurePatient> patients = new ArrayList<>();
-		for (int i=0; i<10; i++) {
+		for (int i=0; i<5; i++) {
 			String e = i == 0 ? email : String.valueOf(i).concat(email);
 			SecurePatient spt = SecurePatient.getBuilder().setEmail(e).setPassword(password1).setName(name).build(context);
 			patients.add(spt);
@@ -75,13 +83,19 @@ public class SimpleTests {
 		assertNotNull(sp1);
 		SecurePatient sp2 = SecurePatient.performLogin(context, email, password1);
 		assertNull(sp2);
+			
+		// test project registration for a patient. Here, the service knows the NNN and date of birth.
+		Episode episode = project.registerPatientToProject(context, "1111111111", LocalDate.of(1975, 1, 1));
+
+		// and now can our patient find their registration?
 		
-		
-		
-		// and now let's delete these patients...		
+				
+		// and now clean-up
+		context.deleteObject(episode);
 		for (SecurePatient sp : patients) {
 			context.deleteObject(sp.getPatient());
 		}
+		context.deleteObject(project);		
 		context.commitChanges();		
 	}
 }
