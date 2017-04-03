@@ -6,6 +6,12 @@
 	<property name="defaultLockType" value="optimistic"/>
 	<property name="defaultPackage" value="com.eldrix.openconsent.model"/>
 	<property name="defaultSchema" value="public"/>
+	<db-entity name="t_episode" schema="public">
+		<db-attribute name="date_registration" type="DATE" isMandatory="true" length="13"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
+		<db-attribute name="patient_identifier" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="project_fk" type="INTEGER" isMandatory="true" length="10"/>
+	</db-entity>
 	<db-entity name="t_patient" schema="public">
 		<db-attribute name="encrypted_email" type="CLOB" isMandatory="true" length="2147483647"/>
 		<db-attribute name="encrypted_encryption_key" type="CLOB" isMandatory="true" length="2147483647"/>
@@ -20,6 +26,11 @@
 		<db-attribute name="title" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
+	<obj-entity name="Episode" className="com.eldrix.openconsent.model.Episode" dbEntityName="t_episode">
+		<obj-attribute name="dateRegistration" type="java.util.Date" db-attribute-path="date_registration"/>
+		<obj-attribute name="patientIdentifier" type="java.lang.String" db-attribute-path="patient_identifier"/>
+		<obj-attribute name="projectFk" type="java.lang.Integer" db-attribute-path="project_fk"/>
+	</obj-entity>
 	<obj-entity name="Patient" className="com.eldrix.openconsent.model.Patient" dbEntityName="t_patient">
 		<obj-attribute name="encryptedEmail" type="java.lang.String" db-attribute-path="encrypted_email"/>
 		<obj-attribute name="encryptedEncryptionKey" type="java.lang.String" db-attribute-path="encrypted_encryption_key"/>
@@ -34,4 +45,11 @@
 		<post-add method-name="onPostAdd"/>
 		<post-load method-name="onPostLoad"/>
 	</obj-entity>
+	<db-relationship name="project" source="t_episode" target="t_project" toMany="false">
+		<db-attribute-pair source="project_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="episodes" source="t_project" target="t_episode" toMany="true">
+		<db-attribute-pair source="id" target="project_fk"/>
+	</db-relationship>
+	<obj-relationship name="project" source="Episode" target="Episode" deleteRule="Deny" db-relationship-path="project.episodes"/>
 </data-map>
