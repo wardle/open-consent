@@ -27,7 +27,7 @@
 		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
 	<obj-entity name="Episode" className="com.eldrix.openconsent.model.Episode" dbEntityName="t_episode">
-		<obj-attribute name="dateRegistration" type="java.util.Date" db-attribute-path="date_registration"/>
+		<obj-attribute name="dateRegistration" type="java.time.LocalDate" db-attribute-path="date_registration"/>
 		<obj-attribute name="patientIdentifier" type="java.lang.String" db-attribute-path="patient_identifier"/>
 	</obj-entity>
 	<obj-entity name="Patient" className="com.eldrix.openconsent.model.Patient" dbEntityName="t_patient">
@@ -50,5 +50,5 @@
 	<db-relationship name="episodes" source="t_project" target="t_episode" toMany="true">
 		<db-attribute-pair source="id" target="project_fk"/>
 	</db-relationship>
-	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Deny" db-relationship-path="project"/>
+	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
 </data-map>

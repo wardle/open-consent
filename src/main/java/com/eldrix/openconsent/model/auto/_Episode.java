@@ -1,6 +1,6 @@
 package com.eldrix.openconsent.model.auto;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.exp.Property;
@@ -19,15 +19,15 @@ public abstract class _Episode extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<Date> DATE_REGISTRATION = new Property<Date>("dateRegistration");
+    public static final Property<LocalDate> DATE_REGISTRATION = new Property<LocalDate>("dateRegistration");
     public static final Property<String> PATIENT_IDENTIFIER = new Property<String>("patientIdentifier");
     public static final Property<Project> PROJECT = new Property<Project>("project");
 
-    public void setDateRegistration(Date dateRegistration) {
+    public void setDateRegistration(LocalDate dateRegistration) {
         writeProperty("dateRegistration", dateRegistration);
     }
-    public Date getDateRegistration() {
-        return (Date)readProperty("dateRegistration");
+    public LocalDate getDateRegistration() {
+        return (LocalDate)readProperty("dateRegistration");
     }
 
     public void setPatientIdentifier(String patientIdentifier) {
