@@ -34,27 +34,26 @@ public final class SecurePatient {
 	private final Patient _patient;
 	private final byte[] _encryptionKey;
 	private static PasswordService _passwordService = new DefaultPasswordService();	// thread-safe
-	private static CipherService _cipherService = new AesCipherService();	// thread-safe
-	private static RandomNumberGenerator _randomService = new SecureRandomNumberGenerator();
+	private static AesCipherService _cipherService = new AesCipherService();	// thread-safe
 	
 	private SecurePatient(Patient pt, String password, boolean isNew) {
 		_patient = Objects.requireNonNull(pt);
 		Objects.requireNonNull(password);
 		if (isNew) {
-			_encryptionKey = _randomService.nextBytes(16).getBytes();
+			_encryptionKey = _cipherService.generateNewKey().getEncoded();
 			setPassword(password);
 		} else {
 			_encryptionKey = decryptEncryptionKey(pt.getEncryptedEncryptionKey(), password);
 		}		
 	}
 	
-	private static byte[] decryptEncryptionKey(byte[] key, String password) {
+	private static byte[] decryptEncryptionKey(String key, String password) {
 		byte[] encryptionKeyKey = new Md5Hash(password).getBytes();	// MD5 generates a 32 character digest
-		return _cipherService.decrypt(key, encryptionKeyKey).getBytes();		
+		return _cipherService.decrypt(Base64.decode(key), encryptionKeyKey).getBytes();		
 	}
-	private static byte[] encryptEncryptionKey(byte[] key, String password) {
+	private static String encryptEncryptionKey(byte[] key, String password) {
 		byte[] encryptionKeyKey = new Md5Hash(password).getBytes();	// MD5 generates a 32 character digest
-		return _cipherService.encrypt(key, encryptionKeyKey).getBytes();
+		return _cipherService.encrypt(key, encryptionKeyKey).toBase64();
 	}
 	
 	private String encrypt(String data) {

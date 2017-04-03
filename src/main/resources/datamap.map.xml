@@ -9,7 +9,7 @@
 	<db-entity name="t_patient" schema="public">
 		<db-attribute name="encrypted_email" type="CLOB" isMandatory="true" length="2147483647"/>
 		<db-attribute name="encrypted_encryption_key" type="CLOB" isMandatory="true" length="2147483647"/>
-		<db-attribute name="encrypted_name" type="CLOB" isMandatory="true"/>
+		<db-attribute name="encrypted_name" type="CLOB" isMandatory="true" length="2147483647"/>
 		<db-attribute name="hashed_email" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="hashed_password" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
@@ -22,7 +22,7 @@
 	</db-entity>
 	<obj-entity name="Patient" className="com.eldrix.openconsent.model.Patient" dbEntityName="t_patient">
 		<obj-attribute name="encryptedEmail" type="java.lang.String" db-attribute-path="encrypted_email"/>
-		<obj-attribute name="encryptedEncryptionKey" type="byte[]" db-attribute-path="encrypted_encryption_key"/>
+		<obj-attribute name="encryptedEncryptionKey" type="java.lang.String" db-attribute-path="encrypted_encryption_key"/>
 		<obj-attribute name="encryptedName" type="java.lang.String" db-attribute-path="encrypted_name"/>
 		<obj-attribute name="hashedEmail" type="java.lang.String" db-attribute-path="hashed_email"/>
 		<obj-attribute name="hashedPassword" type="java.lang.String" db-attribute-path="hashed_password"/>

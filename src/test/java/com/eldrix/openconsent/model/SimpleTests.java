@@ -4,6 +4,9 @@ package com.eldrix.openconsent.model;
 import static org.junit.Assert.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.junit.Rule;
@@ -44,12 +47,32 @@ public class SimpleTests {
 	public void testPatients() {
 		ObjectContext context = getRuntime().newContext();
 		final String email = "wibble@wobble.com";
-		final String password = "password";
+		final String password1 = "password";
+		final String password2 = "p455w0rd";
 		final String name = "John Smith";
-		SecurePatient p1 = SecurePatient.getBuilder().setEmail(email).setPassword(password).setName(name).build(context);
-		assertEquals(email, p1.getEmail());
-		assertTrue(p1.passwordMatches(password));
-		assertFalse(p1.passwordMatches("PASSWORD"));
-		
+		List<SecurePatient> patients = new ArrayList<>();
+		for (int i=0; i<10; i++) {
+			String e = i == 0 ? email : String.valueOf(i).concat(email);
+			SecurePatient spt = SecurePatient.getBuilder().setEmail(e).setPassword(password1).setName(name).build(context);
+			patients.add(spt);
+			String encryptedEncryptionKey = spt.getPatient().getEncryptedEncryptionKey();
+			assertEquals(e, spt.getEmail());
+			assertTrue(spt.passwordMatches(password1));
+			assertFalse(spt.passwordMatches(password2));
+			spt.setPassword(password2);
+			assertTrue(spt.passwordMatches(password2));
+			assertFalse(spt.passwordMatches(password1));
+			assertNotEquals(encryptedEncryptionKey, spt.getPatient().getEncryptedEncryptionKey());	// has encrypted encryption key changed?
+			assertEquals(e, spt.getEmail());
+		}
+		context.commitChanges();
+		SecurePatient sp1 = SecurePatient.performLogin(context, email, password2);
+		assertNotNull(sp1);
+		SecurePatient sp2 = SecurePatient.performLogin(context, email, password1);
+		assertNull(sp2);
+		for (SecurePatient sp : patients) {
+			context.deleteObject(sp.getPatient());
+		}
+		context.commitChanges();		
 	}
 }
