@@ -29,7 +29,6 @@
 	<obj-entity name="Episode" className="com.eldrix.openconsent.model.Episode" dbEntityName="t_episode">
 		<obj-attribute name="dateRegistration" type="java.util.Date" db-attribute-path="date_registration"/>
 		<obj-attribute name="patientIdentifier" type="java.lang.String" db-attribute-path="patient_identifier"/>
-		<obj-attribute name="projectFk" type="java.lang.Integer" db-attribute-path="project_fk"/>
 	</obj-entity>
 	<obj-entity name="Patient" className="com.eldrix.openconsent.model.Patient" dbEntityName="t_patient">
 		<obj-attribute name="encryptedEmail" type="java.lang.String" db-attribute-path="encrypted_email"/>

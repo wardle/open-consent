@@ -21,7 +21,6 @@ public abstract class _Episode extends CayenneDataObject {
 
     public static final Property<Date> DATE_REGISTRATION = new Property<Date>("dateRegistration");
     public static final Property<String> PATIENT_IDENTIFIER = new Property<String>("patientIdentifier");
-    public static final Property<Integer> PROJECT_FK = new Property<Integer>("projectFk");
     public static final Property<Project> PROJECT = new Property<Project>("project");
 
     public void setDateRegistration(Date dateRegistration) {
@@ -36,13 +35,6 @@ public abstract class _Episode extends CayenneDataObject {
     }
     public String getPatientIdentifier() {
         return (String)readProperty("patientIdentifier");
-    }
-
-    public void setProjectFk(Integer projectFk) {
-        writeProperty("projectFk", projectFk);
-    }
-    public Integer getProjectFk() {
-        return (Integer)readProperty("projectFk");
     }
 
     public void setProject(Project project) {
