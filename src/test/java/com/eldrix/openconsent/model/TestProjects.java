@@ -17,7 +17,7 @@ import org.junit.Test;
 import io.bootique.test.BQTestRuntime;
 import io.bootique.test.junit.BQTestFactory;
 
-public class SimpleTests {
+public class TestProjects {
 
 	@Rule
 	public BQTestFactory testFactory = new BQTestFactory();
@@ -67,6 +67,7 @@ public class SimpleTests {
 			SecurePatient spt = SecurePatient.getBuilder().setEmail(e).setPassword(password1).setName(name).build(context);
 			patients.add(spt);
 			String encryptedEncryptionKey = spt.getPatient().getEncryptedEncryptionKey();
+			String encryptedEmail = spt.getPatient().getEncryptedEmail();
 			assertEquals(e, spt.getEmail());
 			assertTrue(spt.passwordMatches(password1));
 			assertFalse(spt.passwordMatches(password2));
@@ -74,6 +75,7 @@ public class SimpleTests {
 			assertTrue(spt.passwordMatches(password2));
 			assertFalse(spt.passwordMatches(password1));
 			assertNotEquals(encryptedEncryptionKey, spt.getPatient().getEncryptedEncryptionKey());	// has encrypted encryption key changed?
+			assertEquals(encryptedEmail, spt.getPatient().getEncryptedEmail());	// unless key changes, encrypted fields should remain same.
 			assertEquals(e, spt.getEmail());
 		}
 		context.commitChanges();
