@@ -45,6 +45,11 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.bootique.linkrest</groupId>
+			<artifactId>bootique-linkrest</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>io.bootique.logback</groupId>
 			<artifactId>bootique-logback</artifactId>
 			<scope>compile</scope>
