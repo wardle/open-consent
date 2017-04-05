@@ -19,6 +19,6 @@ public class Application implements Module {
 	@Override
 	public void configure(Binder binder) {
 		Multibinder<Object> jersey = JerseyModule.contributeResources(binder);
-		//jersey.addBinding().to(Resource.class);
+		jersey.addBinding().to(ProjectResource.class);
 	}
 }
