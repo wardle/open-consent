@@ -2,6 +2,8 @@
 
 OpenConsent is a java-based microservice that acts as a safe trusted intermediary connecting patients with clinical services and research projects.
 
+For more information about this project, please see my recent [blog post](http://wardle.org/information-governance/2017/04/05/pseudonymous-consent-poc.html).
+
 ## For clinical services and research projects
 
 Essentially, clinical services and research projects can lookup patients using three pieces of identification:
