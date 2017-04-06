@@ -35,4 +35,4 @@ Permissions and consent are related to that registration information. Even if th
 
 ## For developers
 
-The service is divided into *core* and *server*. The server is built as a microservice using the Bootique framework and standard JAX-RS API for providing REST services. The object relational mapping is provided by Apache Cayenne, with a PostgreSQL backend.
+The server is built as a microservice using the Bootique framework and standard JAX-RS API for providing REST services. The object relational mapping is provided by Apache Cayenne, with a PostgreSQL backend.
