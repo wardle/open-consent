@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.exp.Property;
 
+import com.eldrix.openconsent.model.Endorsement;
 import com.eldrix.openconsent.model.Registration;
 
 /**
@@ -22,8 +23,11 @@ public abstract class _Patient extends CayenneDataObject {
     public static final Property<String> ENCRYPTED_EMAIL = new Property<String>("encryptedEmail");
     public static final Property<String> ENCRYPTED_ENCRYPTION_KEY = new Property<String>("encryptedEncryptionKey");
     public static final Property<String> ENCRYPTED_NAME = new Property<String>("encryptedName");
+    public static final Property<String> ENCRYPTED_PRIVATE_KEY = new Property<String>("encryptedPrivateKey");
     public static final Property<String> HASHED_EMAIL = new Property<String>("hashedEmail");
     public static final Property<String> HASHED_PASSWORD = new Property<String>("hashedPassword");
+    public static final Property<String> PUBLIC_KEY = new Property<String>("publicKey");
+    public static final Property<List<Endorsement>> ENDORSEMENTS = new Property<List<Endorsement>>("endorsements");
     public static final Property<List<Registration>> REGISTRATIONS = new Property<List<Registration>>("registrations");
 
     public void setEncryptedEmail(String encryptedEmail) {
@@ -47,6 +51,13 @@ public abstract class _Patient extends CayenneDataObject {
         return (String)readProperty("encryptedName");
     }
 
+    public void setEncryptedPrivateKey(String encryptedPrivateKey) {
+        writeProperty("encryptedPrivateKey", encryptedPrivateKey);
+    }
+    public String getEncryptedPrivateKey() {
+        return (String)readProperty("encryptedPrivateKey");
+    }
+
     public void setHashedEmail(String hashedEmail) {
         writeProperty("hashedEmail", hashedEmail);
     }
@@ -60,6 +71,25 @@ public abstract class _Patient extends CayenneDataObject {
     public String getHashedPassword() {
         return (String)readProperty("hashedPassword");
     }
+
+    public void setPublicKey(String publicKey) {
+        writeProperty("publicKey", publicKey);
+    }
+    public String getPublicKey() {
+        return (String)readProperty("publicKey");
+    }
+
+    public void addToEndorsements(Endorsement obj) {
+        addToManyTarget("endorsements", obj, true);
+    }
+    public void removeFromEndorsements(Endorsement obj) {
+        removeToManyTarget("endorsements", obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<Endorsement> getEndorsements() {
+        return (List<Endorsement>)readProperty("endorsements");
+    }
+
 
     public void addToRegistrations(Registration obj) {
         addToManyTarget("registrations", obj, true);

@@ -20,7 +20,8 @@ public abstract class _Episode extends CayenneDataObject {
     public static final String ID_PK_COLUMN = "id";
 
     public static final Property<LocalDate> DATE_REGISTRATION = new Property<LocalDate>("dateRegistration");
-    public static final Property<String> PATIENT_IDENTIFIER = new Property<String>("patientIdentifier");
+    public static final Property<String> PATIENT_AUTHORITY_PSEUDONYM = new Property<String>("patientAuthorityPseudonym");
+    public static final Property<String> PATIENT_PSEUDONYM = new Property<String>("patientPseudonym");
     public static final Property<Project> PROJECT = new Property<Project>("project");
 
     public void setDateRegistration(LocalDate dateRegistration) {
@@ -30,11 +31,18 @@ public abstract class _Episode extends CayenneDataObject {
         return (LocalDate)readProperty("dateRegistration");
     }
 
-    public void setPatientIdentifier(String patientIdentifier) {
-        writeProperty("patientIdentifier", patientIdentifier);
+    public void setPatientAuthorityPseudonym(String patientAuthorityPseudonym) {
+        writeProperty("patientAuthorityPseudonym", patientAuthorityPseudonym);
     }
-    public String getPatientIdentifier() {
-        return (String)readProperty("patientIdentifier");
+    public String getPatientAuthorityPseudonym() {
+        return (String)readProperty("patientAuthorityPseudonym");
+    }
+
+    public void setPatientPseudonym(String patientPseudonym) {
+        writeProperty("patientPseudonym", patientPseudonym);
+    }
+    public String getPatientPseudonym() {
+        return (String)readProperty("patientPseudonym");
     }
 
     public void setProject(Project project) {

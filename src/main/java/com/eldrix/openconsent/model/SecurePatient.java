@@ -1,10 +1,25 @@
 package com.eldrix.openconsent.model;
 
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
@@ -21,10 +36,10 @@ import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.crypto.hash.Sha512Hash;
 
 /**
- * A patient.
+ * A decrypted patient.
  * 
  * We store almost all data encrypted. It uses symmetric encryption with the encryption key
- * itself encrypted using a digest of the user's password.
+ * itself encrypted using a digest of the user's password. 
  * 
  * When the user changes their password, we decrypt the encryption key using the old password and re-encrypt using the new password.
  * 
@@ -35,7 +50,8 @@ import org.apache.shiro.crypto.hash.Sha512Hash;
  */
 public final class SecurePatient {
 	private final Patient _patient;
-	private final byte[] _encryptionKey;
+	private final byte[] _encryptionKey;	// key used for symmetric cipher
+	private final byte[] _privateKey;	// key used for asymmetric cipher
 	private static PasswordService _passwordService = new DefaultPasswordService();	// thread-safe
 	private static AesCipherService _cipherService = new AesCipherService();	// thread-safe
 
@@ -44,27 +60,47 @@ public final class SecurePatient {
 		Objects.requireNonNull(password);
 		if (isNew) {
 			_encryptionKey = _cipherService.generateNewKey().getEncoded();
-			setPassword(password);
+			setPassword(password);	// 
+			pt.setPublicKey("publickey");
+			String privateKey = "encryptedprivatekey";
+			_privateKey = privateKey.getBytes();
+			pt.setEncryptedPrivateKey(privateKey);
 		} else {
-			_encryptionKey = decryptEncryptionKey(pt.getEncryptedEncryptionKey(), password);
+			_encryptionKey = _decryptEncryptionKey(pt.getEncryptedEncryptionKey(), password);
+			_privateKey = pt.getEncryptedPrivateKey().getBytes(); //_decryptEncryptionKey(pt.getEncryptedPrivateKey(), password);
 		}		
 	}
 
-	private static byte[] decryptEncryptionKey(String key, String password) {
+	private static byte[] _decryptEncryptionKey(String key, String password) {
 		byte[] encryptionKeyKey = new Md5Hash(password).getBytes();	// MD5 generates a 32 character digest
 		return _cipherService.decrypt(Base64.decode(key), encryptionKeyKey).getBytes();		
 	}
-	private static String encryptEncryptionKey(byte[] key, String password) {
+	private static String _encryptEncryptionKey(byte[] key, String password) {
 		byte[] encryptionKeyKey = new Md5Hash(password).getBytes();	// MD5 generates a 32 character digest
 		return _cipherService.encrypt(key, encryptionKeyKey).toBase64();
 	}
 
-	private String encrypt(String data) {
+	// symmetric encryption
+	private String _encrypt(String data) {
 		return _cipherService.encrypt(CodecSupport.toBytes(data), _encryptionKey).toBase64();
 	}
-	private String decrypt(String data) {
+	// symmetric decryption
+	private String _decrypt(String data) {
 		return CodecSupport.toString(_cipherService.decrypt(Base64.decode(data), _encryptionKey).getBytes());
 	}
+
+	/**
+	 * Decrypts the given data using asymmetric decryption.
+	 * TODO: implement decryption
+	 */
+	public String decrypt(String data) {
+		return data;
+	}
+
+	public String encrypt(String data)  {
+		return getPatient().encrypt(data);
+	}
+
 
 	/**
 	 * Return the encrypted patient.
@@ -80,6 +116,7 @@ public final class SecurePatient {
 	 * @param email
 	 * @param password
 	 * @return
+	 * @throws NoSuchAlgorithmException 
 	 */
 	public static SecurePatient performLogin(ObjectContext context, String email, String password) {
 		String emailDigest = generateEmailDigest(email);
@@ -106,7 +143,7 @@ public final class SecurePatient {
 
 	private void changePassword(Patient pt, String newPassword) {
 		pt.setHashedPassword(_passwordService.encryptPassword(newPassword));
-		pt.setEncryptedEncryptionKey(encryptEncryptionKey(_encryptionKey, newPassword));
+		pt.setEncryptedEncryptionKey(_encryptEncryptionKey(_encryptionKey, newPassword));
 	}
 
 	/*
@@ -121,11 +158,11 @@ public final class SecurePatient {
 
 
 	public void setName(String name) {
-		getPatient().setEncryptedName(encrypt(name));
+		getPatient().setEncryptedName(_encrypt(name));
 	}
 
 	public String getName() {
-		return decrypt(getPatient().getEncryptedName());
+		return _decrypt(getPatient().getEncryptedName());
 	}
 
 	/**
@@ -136,7 +173,7 @@ public final class SecurePatient {
 	 * @param encryptionKey
 	 */
 	public void setEmail(String email) {
-		getPatient().setEncryptedEmail(encrypt(email));
+		getPatient().setEncryptedEmail(_encrypt(email));
 		getPatient().setHashedEmail(generateEmailDigest(email));
 	}
 
@@ -144,7 +181,7 @@ public final class SecurePatient {
 	 * Get the decrypted email address.
 	 */
 	public String getEmail() {
-		return decrypt(getPatient().getEncryptedEmail());
+		return _decrypt(getPatient().getEncryptedEmail());
 	}
 
 	/**
@@ -153,15 +190,15 @@ public final class SecurePatient {
 	 * @return
 	 */
 	public Registration createRegistrationForEpisode(Episode episode, String identifier, LocalDate dateBirth) {
-		String pseudonym1 = episode.getPatientIdentifier();
+		String pseudonym1 = episode.getPatientPseudonym();
 		String pseudonym2 = episode.getProject().calculatePseudonym(identifier, dateBirth);
 		if (pseudonym1.equals(pseudonym2) == false) {
 			throw new IllegalArgumentException("Episode pseudonym does not match patient's details");
 		}
-		String encrypted = encrypt(pseudonym1);
+		String encrypted = _encrypt(pseudonym1);
 		Registration reg = episode.getObjectContext().newObject(Registration.class);
 		reg.setPatient(getPatient());
-		reg.setEncryptedIdentifier(encrypted);
+		reg.setEncryptedPseudonym(encrypted);
 		return reg;
 	}
 
@@ -170,16 +207,16 @@ public final class SecurePatient {
 	 * pseudonymous identifiers from the registrations.
 	 * @return
 	 */
-	public List<Episode> getRegisteredEpisodes() {
+	public List<Episode> getExplicitEpisodes() {
 		List<String> ids = getPatient().getRegistrations().stream()
-			.map(Registration::getEncryptedIdentifier)
-			.map(eid -> decrypt(eid)).collect(Collectors.toList());
-		Expression qual = Episode.PATIENT_IDENTIFIER.in(ids);
+				.map(Registration::getEncryptedPseudonym)
+				.map(eid -> _decrypt(eid)).collect(Collectors.toList());
+		Expression qual = Episode.PATIENT_PSEUDONYM.in(ids);
 		return ObjectSelect.query(Episode.class, qual).select(getPatient().getObjectContext());
 	}
 
 	/**
-	 * Create a new patient registration using a builder pattern.
+	 * Create a new patient using a builder pattern.
 	 * @return
 	 */
 	public static Builder getBuilder() {

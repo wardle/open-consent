@@ -15,16 +15,17 @@ public abstract class _Registration extends CayenneDataObject {
 
     private static final long serialVersionUID = 1L; 
 
+    public static final String ID_PK_COLUMN = "id";
     public static final String PATIENT_FK_PK_COLUMN = "patient_fk";
 
-    public static final Property<String> ENCRYPTED_IDENTIFIER = new Property<String>("encryptedIdentifier");
+    public static final Property<String> ENCRYPTED_PSEUDONYM = new Property<String>("encryptedPseudonym");
     public static final Property<Patient> PATIENT = new Property<Patient>("patient");
 
-    public void setEncryptedIdentifier(String encryptedIdentifier) {
-        writeProperty("encryptedIdentifier", encryptedIdentifier);
+    public void setEncryptedPseudonym(String encryptedPseudonym) {
+        writeProperty("encryptedPseudonym", encryptedPseudonym);
     }
-    public String getEncryptedIdentifier() {
-        return (String)readProperty("encryptedIdentifier");
+    public String getEncryptedPseudonym() {
+        return (String)readProperty("encryptedPseudonym");
     }
 
     public void setPatient(Patient patient) {

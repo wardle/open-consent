@@ -1,47 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data-map xmlns="http://cayenne.apache.org/schema/7/modelMap"
+<data-map xmlns="http://cayenne.apache.org/schema/9/modelMap"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://cayenne.apache.org/schema/7/modelMap http://cayenne.apache.org/schema/7/modelMap.xsd"
-	 project-version="7">
+	 xsi:schemaLocation="http://cayenne.apache.org/schema/9/modelMap http://cayenne.apache.org/schema/9/modelMap.xsd"
+	 project-version="9">
 	<property name="defaultLockType" value="optimistic"/>
 	<property name="defaultPackage" value="com.eldrix.openconsent.model"/>
 	<property name="defaultSchema" value="public"/>
+	<db-entity name="t_authority" schema="public">
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
+		<db-attribute name="logic" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
+	</db-entity>
+	<db-entity name="t_endorsement" schema="public">
+		<db-attribute name="authority_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="encrypted_authority_pseudonym" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
+		<db-attribute name="patient_fk" type="INTEGER" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="t_episode" schema="public">
 		<db-attribute name="date_registration" type="DATE" isMandatory="true" length="13"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
-		<db-attribute name="patient_identifier" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="patient_authority_pseudonym" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="patient_pseudonym" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="project_fk" type="INTEGER" isMandatory="true" length="10"/>
 	</db-entity>
 	<db-entity name="t_patient" schema="public">
 		<db-attribute name="encrypted_email" type="CLOB" isMandatory="true" length="2147483647"/>
 		<db-attribute name="encrypted_encryption_key" type="CLOB" isMandatory="true" length="2147483647"/>
 		<db-attribute name="encrypted_name" type="CLOB" isMandatory="true" length="2147483647"/>
+		<db-attribute name="encrypted_private_key" type="CLOB" isMandatory="true"/>
 		<db-attribute name="hashed_email" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="hashed_password" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
+		<db-attribute name="public_key" type="CLOB" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="t_project" schema="public">
+		<db-attribute name="authority_fk" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="description" type="CLOB" length="2147483647"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
 		<db-attribute name="title" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
 	<db-entity name="t_registration" schema="public">
-		<db-attribute name="encrypted_identifier" type="LONGVARCHAR" isMandatory="true"/>
-		<db-attribute name="patient_fk" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="encrypted_pseudonym" type="LONGVARCHAR" isMandatory="true"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
+		<db-attribute name="patient_fk" type="INTEGER" isMandatory="true"/>
 	</db-entity>
-	<obj-entity name="Episode" className="com.eldrix.openconsent.model.Episode" dbEntityName="t_episode">
-		<obj-attribute name="dateRegistration" type="java.time.LocalDate" db-attribute-path="date_registration"/>
-		<obj-attribute name="patientIdentifier" type="java.lang.String" db-attribute-path="patient_identifier"/>
+	<obj-entity name="Authority" className="com.eldrix.openconsent.model.Authority" lock-type="optimistic" dbEntityName="t_authority">
+		<obj-attribute name="logic" type="com.eldrix.openconsent.model.AuthorityLogic" db-attribute-path="logic"/>
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+		<obj-attribute name="uuid" type="java.lang.String" db-attribute-path="uuid"/>
+		<post-add method-name="onPostAdd"/>
+		<post-load method-name="onPostLoad"/>
 	</obj-entity>
-	<obj-entity name="Patient" className="com.eldrix.openconsent.model.Patient" dbEntityName="t_patient">
+	<obj-entity name="Endorsement" className="com.eldrix.openconsent.model.Endorsement" lock-type="optimistic" dbEntityName="t_endorsement">
+		<obj-attribute name="encryptedAuthorityPseudonym" type="java.lang.String" db-attribute-path="encrypted_authority_pseudonym"/>
+	</obj-entity>
+	<obj-entity name="Episode" className="com.eldrix.openconsent.model.Episode" lock-type="optimistic" dbEntityName="t_episode">
+		<obj-attribute name="dateRegistration" type="java.time.LocalDate" db-attribute-path="date_registration"/>
+		<obj-attribute name="patientAuthorityPseudonym" type="java.lang.String" db-attribute-path="patient_authority_pseudonym"/>
+		<obj-attribute name="patientPseudonym" type="java.lang.String" db-attribute-path="patient_pseudonym"/>
+	</obj-entity>
+	<obj-entity name="Patient" className="com.eldrix.openconsent.model.Patient" lock-type="optimistic" dbEntityName="t_patient">
 		<obj-attribute name="encryptedEmail" type="java.lang.String" db-attribute-path="encrypted_email"/>
 		<obj-attribute name="encryptedEncryptionKey" type="java.lang.String" db-attribute-path="encrypted_encryption_key"/>
 		<obj-attribute name="encryptedName" type="java.lang.String" db-attribute-path="encrypted_name"/>
+		<obj-attribute name="encryptedPrivateKey" type="java.lang.String" db-attribute-path="encrypted_private_key"/>
 		<obj-attribute name="hashedEmail" type="java.lang.String" db-attribute-path="hashed_email"/>
 		<obj-attribute name="hashedPassword" type="java.lang.String" db-attribute-path="hashed_password"/>
+		<obj-attribute name="publicKey" type="java.lang.String" db-attribute-path="public_key"/>
 	</obj-entity>
-	<obj-entity name="Project" className="com.eldrix.openconsent.model.Project" dbEntityName="t_project">
+	<obj-entity name="Project" className="com.eldrix.openconsent.model.Project" lock-type="optimistic" dbEntityName="t_project">
 		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
 		<obj-attribute name="title" type="java.lang.String" db-attribute-path="title"/>
 		<obj-attribute name="uuid" type="java.lang.String" db-attribute-path="uuid"/>
@@ -49,13 +79,25 @@
 		<post-load method-name="onPostLoad"/>
 	</obj-entity>
 	<obj-entity name="Registration" className="com.eldrix.openconsent.model.Registration" lock-type="optimistic" dbEntityName="t_registration">
-		<obj-attribute name="encryptedIdentifier" type="java.lang.String" db-attribute-path="encrypted_identifier"/>
+		<obj-attribute name="encryptedPseudonym" type="java.lang.String" db-attribute-path="encrypted_pseudonym"/>
 	</obj-entity>
+	<db-relationship name="authority" source="t_endorsement" target="t_authority" toMany="false">
+		<db-attribute-pair source="authority_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="patient" source="t_endorsement" target="t_patient" toMany="false">
+		<db-attribute-pair source="patient_fk" target="id"/>
+	</db-relationship>
 	<db-relationship name="project" source="t_episode" target="t_project" toMany="false">
 		<db-attribute-pair source="project_fk" target="id"/>
 	</db-relationship>
-	<db-relationship name="registrations" source="t_patient" target="t_registration" toDependentPK="true" toMany="true">
+	<db-relationship name="endorsements" source="t_patient" target="t_endorsement" toMany="true">
 		<db-attribute-pair source="id" target="patient_fk"/>
+	</db-relationship>
+	<db-relationship name="registrations" source="t_patient" target="t_registration" toMany="true">
+		<db-attribute-pair source="id" target="patient_fk"/>
+	</db-relationship>
+	<db-relationship name="authority" source="t_project" target="t_authority" toMany="false">
+		<db-attribute-pair source="authority_fk" target="id"/>
 	</db-relationship>
 	<db-relationship name="episodes" source="t_project" target="t_episode" toMany="true">
 		<db-attribute-pair source="id" target="project_fk"/>
@@ -63,7 +105,11 @@
 	<db-relationship name="patient" source="t_registration" target="t_patient" toMany="false">
 		<db-attribute-pair source="patient_fk" target="id"/>
 	</db-relationship>
+	<obj-relationship name="authority" source="Endorsement" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
+	<obj-relationship name="patient" source="Endorsement" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
-	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Deny" db-relationship-path="registrations"/>
+	<obj-relationship name="endorsements" source="Patient" target="Endorsement" deleteRule="Cascade" db-relationship-path="endorsements"/>
+	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Cascade" db-relationship-path="registrations"/>
+	<obj-relationship name="authority" source="Project" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
 	<obj-relationship name="patient" source="Registration" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 </data-map>
