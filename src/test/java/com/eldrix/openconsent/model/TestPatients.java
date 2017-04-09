@@ -109,7 +109,7 @@ public class TestPatients extends _ModelTest {
 		context.commitChanges();
 		
 		// and now, can we find this registration when we are a patient?
-		assertTrue(spt.getExplicitEpisodes().stream().anyMatch(e -> e.getPatientPseudonym() == episode.getPatientPseudonym()));
+		assertTrue(spt.getEpisodesFromRegistrations().stream().anyMatch(e -> e.getPatientPseudonym() == episode.getPatientPseudonym()));
 		
 		// check that can't register when using incorrect data
 		try {
@@ -150,7 +150,10 @@ public class TestPatients extends _ModelTest {
 		
 		// a patient registers their account
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setPassword(password1).setName(name).build(context);
+		context.commitChanges();
 
+		assertEquals(0, spt.getEpisodes().size());
+		
 		// project, by default, is opt-out and so assumes inclusion. Tickets generated from this episode will give access to data
 		Episode episode = project.registerPatientToProject(context, "1111111111", LocalDate.of(1975, 1, 1));
 
@@ -161,17 +164,10 @@ public class TestPatients extends _ModelTest {
 
 		// now, can the patient find his/her episode?
 		// it won't be in the list of explicit episodes as this is an opt-out project.
-		assertFalse(spt.getExplicitEpisodes().stream().anyMatch(e -> e.equals(episode)));
+		assertFalse(spt.getEpisodesFromRegistrations().stream().anyMatch(e -> e.equals(episode)));
 		
 		// so we use the endorsements to find the pseudonyms to match on episodes.
-		// TODO: put this into usual API.
-		List<String> authorityPseudonyms = spt.getPatient().getEndorsements().stream()
-			.map(e -> spt.decrypt(e.getEncryptedAuthorityPseudonym()))
-			.collect(Collectors.toList());
-		assertEquals(1, authorityPseudonyms.size());
-		
-		Expression qual = Episode.PATIENT_AUTHORITY_PSEUDONYM.in(authorityPseudonyms);
-		List<Episode> episodes = ObjectSelect.query(Episode.class, qual).select(context);
+		List<Episode> episodes = spt.getEpisodesFromEndorsements();
 		assertEquals(1, episodes.size());
 		assertEquals(episodes.get(0), episode);	// confirm that it is the episode we created
 		

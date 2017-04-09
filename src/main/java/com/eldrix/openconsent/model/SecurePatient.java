@@ -1,25 +1,13 @@
 package com.eldrix.openconsent.model;
 
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
@@ -29,9 +17,6 @@ import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.codec.CodecSupport;
 import org.apache.shiro.crypto.AesCipherService;
-import org.apache.shiro.crypto.CipherService;
-import org.apache.shiro.crypto.RandomNumberGenerator;
-import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.crypto.hash.Sha512Hash;
 
@@ -204,15 +189,40 @@ public final class SecurePatient {
 
 	/**
 	 * Return a list of episodes for this patient by decrypting the episode
-	 * pseudonymous identifiers from the registrations.
-	 * @return
+	 * project-scoped pseudonymous identifiers from the registrations.
+	 * 
+	 * @return  a list of opted-in episodes for this patient.
 	 */
-	public List<Episode> getExplicitEpisodes() {
+	public List<Episode> getEpisodesFromRegistrations() {
 		List<String> ids = getPatient().getRegistrations().stream()
 				.map(Registration::getEncryptedPseudonym)
 				.map(eid -> _decrypt(eid)).collect(Collectors.toList());
 		Expression qual = Episode.PATIENT_PSEUDONYM.in(ids);
 		return ObjectSelect.query(Episode.class, qual).select(getPatient().getObjectContext());
+	}
+
+	/**
+	 * Returns a list of episodes for this patient by using endorsements to provide authority-scoped pseudonyms. 
+	 * 
+	 * @return a list of opt-out episodes that exist for this patient.
+	 */
+	public List<Episode> getEpisodesFromEndorsements() {
+		List<String> authorityPseudonyms = getPatient().getEndorsements().stream()
+				.map(e -> decrypt(e.getEncryptedAuthorityPseudonym()))
+				.collect(Collectors.toList());
+		Expression qual = Episode.PATIENT_AUTHORITY_PSEUDONYM.in(authorityPseudonyms);
+		return ObjectSelect.query(Episode.class, qual).select(getPatient().getObjectContext());
+	}
+	
+	/**
+	 * Return all episodes for this patient.
+	 * @return
+	 */
+	public List<Episode> getEpisodes() {
+		Set<Episode> episodes = new LinkedHashSet<>();
+		episodes.addAll(getEpisodesFromRegistrations());
+		episodes.addAll(getEpisodesFromEndorsements());
+		return new ArrayList<Episode>(episodes);
 	}
 
 	/**
