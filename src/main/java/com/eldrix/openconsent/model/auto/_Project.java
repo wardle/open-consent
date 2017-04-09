@@ -17,10 +17,10 @@ public abstract class _Project extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> DESCRIPTION = new Property<String>("description");
-    public static final Property<String> TITLE = new Property<String>("title");
-    public static final Property<String> UUID = new Property<String>("uuid");
-    public static final Property<Authority> AUTHORITY = new Property<Authority>("authority");
+    public static final Property<String> DESCRIPTION = Property.create("description", String.class);
+    public static final Property<String> TITLE = Property.create("title", String.class);
+    public static final Property<String> UUID = Property.create("uuid", String.class);
+    public static final Property<Authority> AUTHORITY = Property.create("authority", Authority.class);
 
     public void setDescription(String description) {
         writeProperty("description", description);

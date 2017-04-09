@@ -17,9 +17,9 @@ public abstract class _Authority extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<AuthorityLogic> LOGIC = new Property<AuthorityLogic>("logic");
-    public static final Property<String> NAME = new Property<String>("name");
-    public static final Property<String> UUID = new Property<String>("uuid");
+    public static final Property<AuthorityLogic> LOGIC = Property.create("logic", AuthorityLogic.class);
+    public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<String> UUID = Property.create("uuid", String.class);
 
     public void setLogic(AuthorityLogic logic) {
         writeProperty("logic", logic);

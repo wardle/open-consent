@@ -19,10 +19,10 @@ public abstract class _Episode extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<LocalDate> DATE_REGISTRATION = new Property<LocalDate>("dateRegistration");
-    public static final Property<String> PATIENT_AUTHORITY_PSEUDONYM = new Property<String>("patientAuthorityPseudonym");
-    public static final Property<String> PATIENT_PSEUDONYM = new Property<String>("patientPseudonym");
-    public static final Property<Project> PROJECT = new Property<Project>("project");
+    public static final Property<LocalDate> DATE_REGISTRATION = Property.create("dateRegistration", LocalDate.class);
+    public static final Property<String> PATIENT_AUTHORITY_PSEUDONYM = Property.create("patientAuthorityPseudonym", String.class);
+    public static final Property<String> PATIENT_PSEUDONYM = Property.create("patientPseudonym", String.class);
+    public static final Property<Project> PROJECT = Property.create("project", Project.class);
 
     public void setDateRegistration(LocalDate dateRegistration) {
         writeProperty("dateRegistration", dateRegistration);

@@ -20,15 +20,15 @@ public abstract class _Patient extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> ENCRYPTED_EMAIL = new Property<String>("encryptedEmail");
-    public static final Property<String> ENCRYPTED_ENCRYPTION_KEY = new Property<String>("encryptedEncryptionKey");
-    public static final Property<String> ENCRYPTED_NAME = new Property<String>("encryptedName");
-    public static final Property<String> ENCRYPTED_PRIVATE_KEY = new Property<String>("encryptedPrivateKey");
-    public static final Property<String> HASHED_EMAIL = new Property<String>("hashedEmail");
-    public static final Property<String> HASHED_PASSWORD = new Property<String>("hashedPassword");
-    public static final Property<String> PUBLIC_KEY = new Property<String>("publicKey");
-    public static final Property<List<Endorsement>> ENDORSEMENTS = new Property<List<Endorsement>>("endorsements");
-    public static final Property<List<Registration>> REGISTRATIONS = new Property<List<Registration>>("registrations");
+    public static final Property<String> ENCRYPTED_EMAIL = Property.create("encryptedEmail", String.class);
+    public static final Property<String> ENCRYPTED_ENCRYPTION_KEY = Property.create("encryptedEncryptionKey", String.class);
+    public static final Property<String> ENCRYPTED_NAME = Property.create("encryptedName", String.class);
+    public static final Property<String> ENCRYPTED_PRIVATE_KEY = Property.create("encryptedPrivateKey", String.class);
+    public static final Property<String> HASHED_EMAIL = Property.create("hashedEmail", String.class);
+    public static final Property<String> HASHED_PASSWORD = Property.create("hashedPassword", String.class);
+    public static final Property<String> PUBLIC_KEY = Property.create("publicKey", String.class);
+    public static final Property<List<Endorsement>> ENDORSEMENTS = Property.create("endorsements", List.class);
+    public static final Property<List<Registration>> REGISTRATIONS = Property.create("registrations", List.class);
 
     public void setEncryptedEmail(String encryptedEmail) {
         writeProperty("encryptedEmail", encryptedEmail);

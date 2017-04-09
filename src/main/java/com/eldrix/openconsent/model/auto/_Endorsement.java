@@ -18,9 +18,9 @@ public abstract class _Endorsement extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<String> ENCRYPTED_AUTHORITY_PSEUDONYM = new Property<String>("encryptedAuthorityPseudonym");
-    public static final Property<Authority> AUTHORITY = new Property<Authority>("authority");
-    public static final Property<Patient> PATIENT = new Property<Patient>("patient");
+    public static final Property<String> ENCRYPTED_AUTHORITY_PSEUDONYM = Property.create("encryptedAuthorityPseudonym", String.class);
+    public static final Property<Authority> AUTHORITY = Property.create("authority", Authority.class);
+    public static final Property<Patient> PATIENT = Property.create("patient", Patient.class);
 
     public void setEncryptedAuthorityPseudonym(String encryptedAuthorityPseudonym) {
         writeProperty("encryptedAuthorityPseudonym", encryptedAuthorityPseudonym);
