@@ -6,11 +6,14 @@ import com.eldrix.openconsent.core.Pseudonymizer;
 import com.eldrix.openconsent.model.auto._Authority;
 
 public class Authority extends _Authority {
-    private static final long serialVersionUID = 1L; 
+	private static final AuthorityLogic DEFAULT_LOGIC = AuthorityLogic.UK_NHS; 
+
+	private static final long serialVersionUID = 1L; 
     private Pseudonymizer _pseudonymizer;
         
     @Override
     protected void onPostAdd() {
+    	setLogic(DEFAULT_LOGIC);
     	setUuid(java.util.UUID.randomUUID().toString());
     	_pseudonymizer = new Pseudonymizer(getUuid());
     }
