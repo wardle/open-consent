@@ -1,6 +1,7 @@
 package com.eldrix.openconsent;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -14,18 +15,32 @@ import com.nhl.link.rest.DataResponse;
 import com.nhl.link.rest.LinkRest;
 
 
-@Path("project")
 @Produces(MediaType.APPLICATION_JSON)
-public class ProjectResource {
+public class ProjectSubResource {
 
-	@Context
 	private Configuration config;
+	private int authorityId;
+	
+	public ProjectSubResource(Configuration config, int authorityId) {
+		this.config = config;
+		this.authorityId = authorityId;
+	}
 
+	@POST
+	public DataResponse<Project> create(String data) {
+		return LinkRest.create(Project.class, config).syncAndSelect(data);
+	}
+	
+	@GET
+	public DataResponse<Project> getAll(@Context UriInfo uriInfo) {
+		return LinkRest.select(Project.class, config).uri(uriInfo).get();
+	}
+	
 	@GET
 	@Path("{id}")
 	public DataResponse<Project> getOne(@PathParam("id") int id, @Context UriInfo uriInfo) {
 		return LinkRest.select(Project.class, config)
 				.byId(id).uri(uriInfo)
-				.selectOne();
+				.getOne();
 	}
 }

@@ -2,7 +2,6 @@ package com.eldrix.openconsent;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.google.inject.multibindings.Multibinder;
 
 import io.bootique.Bootique;
 import io.bootique.jersey.JerseyModule;
@@ -18,7 +17,7 @@ public class Application implements Module {
     
 	@Override
 	public void configure(Binder binder) {
-		Multibinder<Object> jersey = JerseyModule.contributeResources(binder);
-		jersey.addBinding().to(ProjectResource.class);
+		JerseyModule.extend(binder)
+			.addResource(AuthorityResource.class);
 	}
 }
