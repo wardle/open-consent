@@ -33,6 +33,13 @@ public class Authority extends _Authority {
     	return getLogic().isValidIdentifier(this, identifier);
     }
     
+    public Pseudonymizer pseudonymizer() {
+    	if (_pseudonymizer == null) {
+    		_pseudonymizer = new Pseudonymizer(getUuid());
+    	}
+    	return _pseudonymizer;
+    }
+    
     /**
      * Generate an authority-pseudonym.
      * @param identifier
@@ -40,6 +47,6 @@ public class Authority extends _Authority {
      * @return
      */
     public String calculateAuthorityPseudonym(String identifier, LocalDate dateBirth) {
-    	return _pseudonymizer.calculatePseudonym(identifier, dateBirth);
+    	return pseudonymizer().calculatePseudonym(identifier, dateBirth);
     }
 }
