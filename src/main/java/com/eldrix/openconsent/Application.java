@@ -18,6 +18,7 @@ public class Application implements Module {
 	@Override
 	public void configure(Binder binder) {
 		JerseyModule.extend(binder)
-			.addResource(AuthorityResource.class);
+			.addResource(AuthorityResource.class)
+			.addResource(PatientResource.class);
 	}
 }

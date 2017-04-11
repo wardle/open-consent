@@ -104,14 +104,25 @@ public final class SecurePatient {
 	 * @throws NoSuchAlgorithmException 
 	 */
 	public static SecurePatient performLogin(ObjectContext context, String email, String password) {
-		String emailDigest = generateEmailDigest(email);
-		Patient pt = ObjectSelect.query(Patient.class, Patient.HASHED_EMAIL.eq(emailDigest)).selectOne(context);
+		Patient pt = fetchPatient(context, email);
 		if (pt != null) {
 			if (_passwordService.passwordsMatch(password, pt.getHashedPassword())) {
 				return new SecurePatient(pt, password, false);
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Fetch a patient using the email specified.
+	 * @param context
+	 * @param email
+	 * @return
+	 */
+	public static Patient fetchPatient(ObjectContext context, String email) {
+		String emailDigest = generateEmailDigest(email);
+		Patient pt = ObjectSelect.query(Patient.class, Patient.HASHED_EMAIL.eq(emailDigest)).selectOne(context);
+		return pt;
 	}
 
 	public boolean passwordMatches(String password) {
