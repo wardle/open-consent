@@ -110,6 +110,7 @@ public class ProjectSubResource {
 					.orElseGet(new EndorsementMaker(project, patient, identifier, dateBirth2));
 			return LinkRest.service(config)
 					.select(Endorsement.class)
+					.constraint(endorsementConstraint())
 					.uri(uriInfo)
 					.byId(Cayenne.intPKForObject(endorsement))
 					.get();
@@ -118,6 +119,15 @@ public class ProjectSubResource {
 		}
 	}
 	
+	private static Constraint<Endorsement> endorsementConstraint() {
+		return Constraint.idOnly(Endorsement.class);
+	}
+	
+	
+	/**
+	 * Creates an endorsement when required
+	 *
+	 */
 	private class EndorsementMaker implements Supplier<Endorsement> {
 		final Project _project;
 		final Patient _patient;
