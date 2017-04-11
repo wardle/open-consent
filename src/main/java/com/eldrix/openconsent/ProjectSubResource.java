@@ -3,6 +3,7 @@ package com.eldrix.openconsent;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -91,36 +92,50 @@ public class ProjectSubResource {
 		if (identifier == null || identifier.length() == 0) {
 			throw new LinkRestException(Status.BAD_REQUEST, "Invalid patient identifier.");
 		}
-		if (dateBirth == null || dateBirth.length() == 0) {
-			throw new LinkRestException(Status.BAD_REQUEST, "Invalid date of birth.");
+		try {
+			LocalDate dateBirth2 = LocalDate.parse(dateBirth);
+			List<Project> projects = LinkRest.service(config).selectById(Project.class, id).getObjects();
+			if (projects.size() == 0) {
+				throw new LinkRestException(Status.NOT_FOUND, "No project found with id: "+id);
+			}
+			Project project = projects.get(0);
+			Patient patient = SecurePatient.fetchPatient(project.getObjectContext(), email);
+			if (patient == null) {
+				throw new LinkRestException(Status.NOT_FOUND, "No patient found with email: " + email);
+			}
+			Authority authority = project.getAuthority();
+			Endorsement endorsement = patient.getEndorsements().stream()
+					.filter(e -> e.getAuthority().equals(authority))
+					.findAny()
+					.orElseGet(new EndorsementMaker(project, patient, identifier, dateBirth2));
+			return LinkRest.service(config)
+					.select(Endorsement.class)
+					.uri(uriInfo)
+					.byId(Cayenne.intPKForObject(endorsement))
+					.get();
+		} catch (DateTimeParseException e) {
+			throw new LinkRestException(Status.BAD_REQUEST, "Invalid date of birth", e);
 		}
-		List<Project> projects = LinkRest.service(config).selectById(Project.class, id).getObjects();
-		if (projects.size() == 0) {
-			throw new LinkRestException(Status.NOT_FOUND, "No project found with id: "+id);
-		}
-		Project project = projects.get(0);
-		Patient patient = SecurePatient.fetchPatient(project.getObjectContext(), email);
-		if (patient == null) {
-			throw new LinkRestException(Status.NOT_FOUND, "No patient found with email: " + email);
-		}
-		Authority authority = project.getAuthority();
-		Endorsement endorsement = patient.getEndorsements().stream()
-				.filter(e -> e.getAuthority().equals(authority)).findAny().orElseGet(() -> {
-					try {
-						LocalDate dateBirth2 = LocalDate.parse(dateBirth);
-						Endorsement e = project.endorsePatient(patient, identifier, dateBirth2);
-						e.getObjectContext().commitChanges();
-						return e;
-					} catch (DateTimeParseException e) {
-						throw new LinkRestException(Status.BAD_REQUEST, "Invalid date of birth", e);
-					}	
-				});
-		return LinkRest.service(config)
-				.select(Endorsement.class)
-				.uri(uriInfo)
-				.byId(Cayenne.intPKForObject(endorsement))
-				.get();
 	}
 	
+	private class EndorsementMaker implements Supplier<Endorsement> {
+		final Project _project;
+		final Patient _patient;
+		final String _identifier;
+		final LocalDate _dateBirth;
+		EndorsementMaker(Project project, Patient patient, String identifier, LocalDate dateBirth) {
+			_project = project;
+			_patient = patient;
+			_identifier = identifier;
+			_dateBirth = dateBirth;
+		}
+		@Override
+		public Endorsement get() {
+			Endorsement e = _project.endorsePatient(_patient, _identifier, _dateBirth);
+			e.getObjectContext().commitChanges();
+			return e;
+		}
+		
+	}
 	
 }
