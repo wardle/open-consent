@@ -81,6 +81,9 @@
 	<obj-entity name="Registration" className="com.eldrix.openconsent.model.Registration" lock-type="optimistic" dbEntityName="t_registration">
 		<obj-attribute name="encryptedPseudonym" type="java.lang.String" db-attribute-path="encrypted_pseudonym"/>
 	</obj-entity>
+	<db-relationship name="projects" source="t_authority" target="t_project" toMany="true">
+		<db-attribute-pair source="id" target="authority_fk"/>
+	</db-relationship>
 	<db-relationship name="authority" source="t_endorsement" target="t_authority" toMany="false">
 		<db-attribute-pair source="authority_fk" target="id"/>
 	</db-relationship>
@@ -105,11 +108,13 @@
 	<db-relationship name="patient" source="t_registration" target="t_patient" toMany="false">
 		<db-attribute-pair source="patient_fk" target="id"/>
 	</db-relationship>
+	<obj-relationship name="projects" source="Authority" target="Project" deleteRule="Deny" db-relationship-path="projects"/>
 	<obj-relationship name="authority" source="Endorsement" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
 	<obj-relationship name="patient" source="Endorsement" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
 	<obj-relationship name="endorsements" source="Patient" target="Endorsement" deleteRule="Cascade" db-relationship-path="endorsements"/>
 	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Cascade" db-relationship-path="registrations"/>
 	<obj-relationship name="authority" source="Project" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
+	<obj-relationship name="episodes" source="Project" target="Episode" deleteRule="Deny" db-relationship-path="episodes"/>
 	<obj-relationship name="patient" source="Registration" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 </data-map>
