@@ -9,8 +9,6 @@ package com.eldrix.openconsent.nhs;
  * 
  * At present, this class only provides a static utility function to validate an individual NHS Number.
  * 
- * 
- * @author Mark Wardle
  *
  */
 public class NhsNumber {

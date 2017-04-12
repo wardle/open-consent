@@ -14,8 +14,6 @@ import org.apache.commons.codec.digest.DigestUtils;
  * 
  * This identifier is created using a salted SHA256 hash.
  *
- * @author Mark Wardle
- *
  */
 public class Pseudonymizer {
 	private final String _salt;

@@ -29,8 +29,6 @@ import org.apache.shiro.crypto.hash.Sha512Hash;
  * When the user changes their password, we decrypt the encryption key using the old password and re-encrypt using the new password.
  * 
  * The primary goal is to ensure the security of person-identifiable information. 
- * 
- * @author Mark Wardle
  *
  */
 public final class SecurePatient {

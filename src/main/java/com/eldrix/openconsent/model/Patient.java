@@ -12,7 +12,6 @@ import com.eldrix.openconsent.model.auto._Patient;
  * By design, the only way of accessing the encrypted data is to use a SecurePatient instance
  * created using the patient's own password. 
  * 
- * @author mark
  *
  */
 public class Patient extends _Patient {
