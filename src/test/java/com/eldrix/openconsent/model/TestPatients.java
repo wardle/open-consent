@@ -10,11 +10,8 @@ import static org.junit.Assert.assertTrue;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.query.ObjectSelect;
 import org.junit.Test;
 
 public class TestPatients extends _ModelTest {
@@ -160,7 +157,7 @@ public class TestPatients extends _ModelTest {
 		context.commitChanges();
 
 		// patient wants to opt-out... first, endorse (validate) their account - linking them to authority.   
-		Endorsement endorsement = spt.getPatient().createEndorsement(authority, "1111111111", LocalDate.of(1975, 1, 1));
+		Endorsement endorsement = authority.endorsePatient(spt.getPatient(), "1111111111", LocalDate.of(1975, 1, 1));
 
 		// now, can the patient find his/her episode?
 		// it won't be in the list of explicit episodes as this is an opt-out project.

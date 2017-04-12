@@ -3,7 +3,6 @@ package com.eldrix.openconsent;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.function.Supplier;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -103,11 +102,8 @@ public class ProjectSubResource {
 			if (patient == null) {
 				throw new LinkRestException(Status.NOT_FOUND, "No patient found with email: " + email);
 			}
-			Authority authority = project.getAuthority();
-			Endorsement endorsement = patient.getEndorsements().stream()
-					.filter(e -> e.getAuthority().equals(authority))
-					.findAny()
-					.orElseGet(new EndorsementMaker(project, patient, identifier, dateBirth2));
+			Endorsement endorsement = project.getAuthority().endorsePatient(patient, identifier, dateBirth2);
+			endorsement.getObjectContext().commitChanges();
 			return LinkRest.service(config)
 					.select(Endorsement.class)
 					.constraint(endorsementConstraint())
@@ -121,31 +117,5 @@ public class ProjectSubResource {
 	
 	private static Constraint<Endorsement> endorsementConstraint() {
 		return Constraint.idOnly(Endorsement.class);
-	}
-	
-	
-	/**
-	 * Creates an endorsement when required
-	 *
-	 */
-	private class EndorsementMaker implements Supplier<Endorsement> {
-		final Project _project;
-		final Patient _patient;
-		final String _identifier;
-		final LocalDate _dateBirth;
-		EndorsementMaker(Project project, Patient patient, String identifier, LocalDate dateBirth) {
-			_project = project;
-			_patient = patient;
-			_identifier = identifier;
-			_dateBirth = dateBirth;
-		}
-		@Override
-		public Endorsement get() {
-			Endorsement e = _project.endorsePatient(_patient, _identifier, _dateBirth);
-			e.getObjectContext().commitChanges();
-			return e;
-		}
-		
-	}
-	
+	}	
 }

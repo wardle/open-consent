@@ -2,8 +2,6 @@ package com.eldrix.openconsent.model;
 
 
 
-import java.time.LocalDate;
-
 import com.eldrix.openconsent.model.auto._Patient;
 
 /**
@@ -26,15 +24,6 @@ public class Patient extends _Patient {
 	public String encrypt(String data) {
 		return data;
 	}
-	
-	public Endorsement createEndorsement(Authority authority, String identifier, LocalDate dateBirth) {
-		String authorityPseudonym = authority.calculateAuthorityPseudonym(identifier, dateBirth);
-		String encrypted = encrypt(authorityPseudonym);
-		Endorsement endorsement = getObjectContext().newObject(Endorsement.class);
-		endorsement.setPatient(this);
-		endorsement.setEncryptedAuthorityPseudonym(encrypted);	// only patient can decrypt this later on
-		endorsement.setAuthority(authority);
-		return endorsement;
-	}
+
 }
 
