@@ -42,7 +42,9 @@ flyway:
 
 5. Create the database using flyway migrations. 
 
+```
 java -jar target/openconsent-1.0-SNAPSHOT.jar --config=config.yml --migrate
+```
 
 6. You can run the unit tests to check it is all working
 
