@@ -4,7 +4,7 @@ OpenConsent is a java-based microservice that acts as a safe trusted intermediar
 
 For more information about this project, please see my recent [blog post](http://wardle.org/information-governance/2017/04/05/pseudonymous-consent-poc.html).
 
-An updated description of the project is now available here: [2017-04-08-pseudonymous-consent.markdown](http://wardle.org/information-governance/2017-04-08-pseudonymous-consent.html)
+An updated description of the project is now available here: [http://wardle.org/information-governance/2017/04/08/pseudonymous-consent.html](http://wardle.org/information-governance/2017/04/08/pseudonymous-consent.html)
 
 
 ## How to get started
