@@ -17,8 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.cayenne.Cayenne;
-
+import com.eldrix.openconsent.core.SingleObjectListener;
 import com.eldrix.openconsent.model.Authority;
 import com.eldrix.openconsent.model.Endorsement;
 import com.eldrix.openconsent.model.Patient;
@@ -108,14 +107,18 @@ public class ProjectSubResource {
 					.select(Endorsement.class)
 					.constraint(endorsementConstraint())
 					.uri(uriInfo)
-					.byId(Cayenne.intPKForObject(endorsement))
+					.listener(new SingleObjectListener<Endorsement>(endorsement))
 					.get();
 		} catch (DateTimeParseException e) {
 			throw new LinkRestException(Status.BAD_REQUEST, "Invalid date of birth", e);
 		}
 	}
 	
-	private static Constraint<Endorsement> endorsementConstraint() {
-		return Constraint.idOnly(Endorsement.class);
+	public static Constraint<Endorsement> endorsementConstraint() {
+		return Constraint.idOnly(Endorsement.class)
+				.attributes(Endorsement.AUTHORITY, Endorsement.PATIENT)
+				.path(Endorsement.PATIENT, PatientResource.constraints())
+				.path(Endorsement.AUTHORITY, AuthorityResource.constraints());
+
 	}	
 }

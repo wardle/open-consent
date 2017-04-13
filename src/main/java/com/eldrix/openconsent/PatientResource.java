@@ -12,15 +12,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.cayenne.Cayenne;
 import org.apache.cayenne.ObjectContext;
 
+import com.eldrix.openconsent.core.SingleObjectListener;
 import com.eldrix.openconsent.model.Patient;
 import com.eldrix.openconsent.model.SecurePatient;
 import com.nhl.link.rest.DataResponse;
 import com.nhl.link.rest.LinkRest;
 import com.nhl.link.rest.LinkRestException;
 import com.nhl.link.rest.constraints.Constraint;
+import com.nhl.link.rest.constraints.ConstraintsBuilder;
 import com.nhl.link.rest.runtime.LinkRestRuntime;
 import com.nhl.link.rest.runtime.cayenne.ICayennePersister;
 
@@ -29,11 +30,11 @@ import com.nhl.link.rest.runtime.cayenne.ICayennePersister;
 @Produces(MediaType.APPLICATION_JSON)
 public class PatientResource {
 	private final static int MINIMUM_PASSWORD_LENGTH = 4;
-	
+
 	@Context
 	private Configuration config;
 
-	public Constraint<Patient> constraints() {
+	public static ConstraintsBuilder<Patient> constraints() {
 		return Constraint.idOnly(Patient.class);
 	}
 
@@ -71,10 +72,10 @@ public class PatientResource {
 		ObjectContext context = cayenne.newContext();
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setName(name).setPassword(password1).build(context);
 		context.commitChanges();
-		int pk = Cayenne.intPKForObject(spt.getPatient());
-		return LinkRest.service(config).select(Patient.class).byId(pk).get();
+		Object listener = new SingleObjectListener<Patient>(spt.getPatient());
+		return LinkRest.service(config).select(Patient.class).listener(listener).get();
 	}
-	
+
 	@GET
 	@Path("{patientId}")
 	public DataResponse<Patient> getOne(@PathParam("patientId") int id, @Context UriInfo uriInfo) {
@@ -82,5 +83,27 @@ public class PatientResource {
 				.byId(id).uri(uriInfo)
 				.constraint(constraints())
 				.getOne();
+	}
+
+	/**
+	 * Patient login.
+	 * 
+	 * This does not currently issue a cookie or authentication token, but simply returns
+	 * the data for the patient as a proof of concept.
+	 * @param email
+	 * @param password
+	 * @param uriInfo
+	 * @return
+	 */
+	@POST
+	@Path("login")
+	public DataResponse<SecurePatient> login(@QueryParam("email") String email,
+			@QueryParam("password") String password,
+			@Context UriInfo uriInfo) {
+		ICayennePersister cayenne = LinkRestRuntime.service(ICayennePersister.class, config);
+		ObjectContext context = cayenne.newContext();
+		SecurePatient spt = SecurePatient.performLogin(context, email, password);
+		Object listener = new SingleObjectListener<SecurePatient>(spt);
+		return LinkRest.select(SecurePatient.class, config).listener(listener).uri(uriInfo).getOne(); 
 	}
 }

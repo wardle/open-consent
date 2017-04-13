@@ -14,6 +14,7 @@ import com.eldrix.openconsent.model.Authority;
 import com.nhl.link.rest.DataResponse;
 import com.nhl.link.rest.LinkRest;
 import com.nhl.link.rest.constraints.Constraint;
+import com.nhl.link.rest.constraints.ConstraintsBuilder;
 
 
 @Path("authority")
@@ -23,7 +24,7 @@ public class AuthorityResource {
 	@Context
 	private Configuration config;
 
-	public Constraint<Authority> constraints() {
+	public static ConstraintsBuilder<Authority> constraints() {
 		return Constraint.idAndAttributes(Authority.class).excludeProperty(Authority.UUID);
 	}
 	

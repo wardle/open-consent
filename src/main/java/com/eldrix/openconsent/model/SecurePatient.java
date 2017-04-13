@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.cayenne.Cayenne;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.query.ObjectSelect;
@@ -19,6 +20,10 @@ import org.apache.shiro.codec.CodecSupport;
 import org.apache.shiro.crypto.AesCipherService;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.crypto.hash.Sha512Hash;
+
+import com.nhl.link.rest.annotation.LrAttribute;
+import com.nhl.link.rest.annotation.LrId;
+import com.nhl.link.rest.annotation.LrRelationship;
 
 /**
  * A decrypted patient.
@@ -38,6 +43,11 @@ public final class SecurePatient {
 	private static PasswordService _passwordService = new DefaultPasswordService();	// thread-safe
 	private static AesCipherService _cipherService = new AesCipherService();	// thread-safe
 
+	@LrId
+	public int getId() {
+		return Cayenne.intPKForObject(getPatient());
+	}
+	
 	private SecurePatient(Patient pt, String password, boolean isNew) {
 		_patient = Objects.requireNonNull(pt);
 		Objects.requireNonNull(password);
@@ -89,6 +99,7 @@ public final class SecurePatient {
 	 * Return the encrypted patient.
 	 * @return
 	 */
+	@LrRelationship
 	public Patient getPatient() {
 		return _patient;
 	}
@@ -155,6 +166,7 @@ public final class SecurePatient {
 		getPatient().setEncryptedName(_encrypt(name));
 	}
 
+	@LrAttribute
 	public String getName() {
 		return _decrypt(getPatient().getEncryptedName());
 	}
@@ -174,6 +186,7 @@ public final class SecurePatient {
 	/**
 	 * Get the decrypted email address.
 	 */
+	@LrAttribute
 	public String getEmail() {
 		return _decrypt(getPatient().getEncryptedEmail());
 	}
@@ -227,6 +240,7 @@ public final class SecurePatient {
 	 * Return all episodes for this patient.
 	 * @return
 	 */
+	@LrRelationship
 	public List<Episode> getEpisodes() {
 		Set<Episode> episodes = new LinkedHashSet<>();
 		episodes.addAll(getEpisodesFromRegistrations());
