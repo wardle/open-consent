@@ -50,7 +50,7 @@ public class PatientResource {
 	 */
 	@Path("register")
 	@POST
-	public DataResponse<Patient> register(
+	public DataResponse<SecurePatient> register(
 			String data,
 			@QueryParam("email") String email,
 			@QueryParam("name") String name,
@@ -72,8 +72,8 @@ public class PatientResource {
 		ObjectContext context = cayenne.newContext();
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setName(name).setPassword(password1).build(context);
 		context.commitChanges();
-		Object listener = new SingleObjectListener<Patient>(spt.getPatient());
-		return LinkRest.service(config).select(Patient.class).listener(listener).get();
+		Object listener = new SingleObjectListener<SecurePatient>(spt);
+		return LinkRest.service(config).select(SecurePatient.class).listener(listener).getOne();
 	}
 
 	@GET
