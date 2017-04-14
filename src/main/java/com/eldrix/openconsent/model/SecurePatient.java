@@ -1,6 +1,8 @@
 package com.eldrix.openconsent.model;
 
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.crypto.NoSuchPaddingException;
 
 import org.apache.cayenne.Cayenne;
 import org.apache.cayenne.ObjectContext;
@@ -21,6 +25,7 @@ import org.apache.shiro.crypto.AesCipherService;
 import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.crypto.hash.Sha512Hash;
 
+import com.eldrix.openconsent.core.RsaService;
 import com.nhl.link.rest.annotation.LrAttribute;
 import com.nhl.link.rest.annotation.LrId;
 import com.nhl.link.rest.annotation.LrRelationship;
@@ -42,25 +47,27 @@ public final class SecurePatient {
 	private final byte[] _privateKey;	// key used for asymmetric cipher
 	private static PasswordService _passwordService = new DefaultPasswordService();	// thread-safe
 	private static AesCipherService _cipherService = new AesCipherService();	// thread-safe
+	private RsaService _rsaService;			// not thread-safe, yet.
 
 	@LrId
 	public int getId() {
 		return Cayenne.intPKForObject(getPatient());
 	}
-	
+
 	private SecurePatient(Patient pt, String password, boolean isNew) {
 		_patient = Objects.requireNonNull(pt);
 		Objects.requireNonNull(password);
+		_rsaService = new RsaService();
 		if (isNew) {
 			_encryptionKey = _cipherService.generateNewKey().getEncoded();
-			setPassword(password);	// 
-			pt.setPublicKey("publickey");
-			String privateKey = "encryptedprivatekey";
-			_privateKey = privateKey.getBytes();
-			pt.setEncryptedPrivateKey(privateKey);
+			setPassword(password);
+			KeyPair keyPair = _rsaService.generateKeyPair(1024);
+			pt.setPublicKey(Base64.encodeToString(keyPair.getPublic().getEncoded()));
+			_privateKey = keyPair.getPrivate().getEncoded();
+			pt.setEncryptedPrivateKey(_encryptEncryptionKey(_privateKey, password));
 		} else {
 			_encryptionKey = _decryptEncryptionKey(pt.getEncryptedEncryptionKey(), password);
-			_privateKey = pt.getEncryptedPrivateKey().getBytes(); //_decryptEncryptionKey(pt.getEncryptedPrivateKey(), password);
+			_privateKey = _decryptEncryptionKey(pt.getEncryptedPrivateKey(), password);
 		}		
 	}
 
@@ -84,13 +91,13 @@ public final class SecurePatient {
 
 	/**
 	 * Decrypts the given data using asymmetric decryption.
-	 * TODO: implement decryption
 	 */
-	public String decrypt(String data) {
-		return data;
+	public String decryptUsingPrivateKey(String data) {
+		PrivateKey key = RsaService.getPrivate(_privateKey);
+		return _rsaService.decryptText(data, key);
 	}
 
-	public String encrypt(String data)  {
+	public String encryptUsingPublicKey(String data)   {
 		return getPatient().encrypt(data);
 	}
 
@@ -110,6 +117,7 @@ public final class SecurePatient {
 	 * @param email
 	 * @param password
 	 * @return
+	 * @throws NoSuchPaddingException 
 	 * @throws NoSuchAlgorithmException 
 	 */
 	public static SecurePatient performLogin(ObjectContext context, String email, String password) {
@@ -121,7 +129,7 @@ public final class SecurePatient {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Fetch a patient using the email specified.
 	 * @param context
@@ -230,12 +238,15 @@ public final class SecurePatient {
 	 */
 	public List<Episode> getEpisodesFromEndorsements() {
 		List<String> authorityPseudonyms = getPatient().getEndorsements().stream()
-				.map(e -> decrypt(e.getEncryptedAuthorityPseudonym()))
+				.map(e -> {
+					return decryptUsingPrivateKey(e.getEncryptedAuthorityPseudonym());
+				})
 				.collect(Collectors.toList());
 		Expression qual = Episode.PATIENT_AUTHORITY_PSEUDONYM.in(authorityPseudonyms);
 		return ObjectSelect.query(Episode.class, qual).select(getPatient().getObjectContext());
+
 	}
-	
+
 	/**
 	 * Return all episodes for this patient.
 	 * @return
@@ -273,7 +284,7 @@ public final class SecurePatient {
 			return this;
 		}
 
-		public SecurePatient build(ObjectContext context) {
+		public SecurePatient build(ObjectContext context)  {
 			Objects.requireNonNull(_email);
 			Objects.requireNonNull(_name);
 			Patient pt = context.newObject(Patient.class);

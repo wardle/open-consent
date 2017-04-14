@@ -76,6 +76,15 @@ public class TestPatients extends _ModelTest {
 		context.commitChanges();
 	}
 	
+	@Test
+	public void testSimpleEncryption() {
+		ObjectContext context = getRuntime().newContext();
+		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setPassword(password1).setName(name).build(context);
+		String data = "Hello, world";
+		String encrypted = spt.encryptUsingPublicKey(data);
+		assertEquals(data, spt.decryptUsingPrivateKey(encrypted));
+	}
+	
 	/**
 	 * Test simple registration.
 	 * Here a patient creates an account and manually registers to opt-in to a project.

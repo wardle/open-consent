@@ -2,6 +2,11 @@ package com.eldrix.openconsent.model;
 
 
 
+import java.security.PublicKey;
+
+import org.apache.shiro.codec.Base64;
+
+import com.eldrix.openconsent.core.RsaService;
 import com.eldrix.openconsent.model.auto._Patient;
 
 /**
@@ -17,12 +22,11 @@ public class Patient extends _Patient {
 
 	/**
 	 * Encrypt data using public key
-	 * TODO: implement encryption here
-	 * @param data
-	 * @return
 	 */
 	public String encrypt(String data) {
-		return data;
+		PublicKey key = RsaService.getPublic(Base64.decode(getPublicKey()));
+		return new RsaService().encryptText(data, key);
+
 	}
 
 }
