@@ -223,7 +223,7 @@ public final class SecurePatient {
 	 * 
 	 * @return  a list of opted-in episodes for this patient.
 	 */
-	public List<Episode> getEpisodesFromRegistrations() {
+	public List<Episode> fetchEpisodesFromRegistrations() {
 		List<String> ids = getPatient().getRegistrations().stream()
 				.map(Registration::getEncryptedPseudonym)
 				.map(eid -> _decrypt(eid)).collect(Collectors.toList());
@@ -236,7 +236,7 @@ public final class SecurePatient {
 	 * 
 	 * @return a list of opt-out episodes that exist for this patient.
 	 */
-	public List<Episode> getEpisodesFromEndorsements() {
+	public List<Episode> fetchEpisodesFromEndorsements() {
 		List<String> authorityPseudonyms = getPatient().getEndorsements().stream()
 				.map(e -> {
 					return decryptUsingPrivateKey(e.getEncryptedAuthorityPseudonym());
@@ -252,10 +252,10 @@ public final class SecurePatient {
 	 * @return
 	 */
 	@LrRelationship
-	public List<Episode> getEpisodes() {
+	public List<Episode> fetchEpisodes() {
 		Set<Episode> episodes = new LinkedHashSet<>();
-		episodes.addAll(getEpisodesFromRegistrations());
-		episodes.addAll(getEpisodesFromEndorsements());
+		episodes.addAll(fetchEpisodesFromRegistrations());
+		episodes.addAll(fetchEpisodesFromEndorsements());
 		return new ArrayList<Episode>(episodes);
 	}
 

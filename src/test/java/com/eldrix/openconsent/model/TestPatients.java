@@ -20,6 +20,8 @@ public class TestPatients extends _ModelTest {
 	final String password1 = "password";
 	final String password2 = "p455w0rd";
 	final String name = "John Smith";
+	final String nnn = "11111111111";
+	final LocalDate dateBirth = LocalDate.of(1975, 1, 1);
 
 	/**
 	 * Test simple patient account creation
@@ -85,6 +87,46 @@ public class TestPatients extends _ModelTest {
 		assertEquals(data, spt.decryptUsingPrivateKey(encrypted));
 	}
 	
+	@Test
+	public void testComplexEncryption() {
+		ObjectContext context = getRuntime().newContext();
+		// set-up authority and project
+		Authority authority = context.newObject(Authority.class);
+		authority.setName("NHS");
+		authority.setLogic(AuthorityLogic.UK_NHS);
+		Project project = context.newObject(Project.class);
+		project.setTitle("Multiple sclerosis service");
+		project.setAuthority(authority);
+		// a patient registers their account
+		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setPassword(password1).setName(name).build(context);
+		context.commitChanges();
+		// validate (endorse) this account linking it to an authority.
+		Patient pt = SecurePatient.fetchPatient(context, email);
+		Endorsement endorsement = authority.endorsePatient(pt, nnn, dateBirth);
+		assertEquals(0, spt.fetchEpisodes().size());		// confirm that patient has no episodes, yet
+		//
+		// now our multiple sclerosis service registers the patient
+		Episode episode = project.registerPatientToProject(context, nnn, dateBirth);
+		context.commitChanges();
+		assertEquals(1, spt.fetchEpisodes().size());		// patient should now have one episode.
+
+		// project sends a message to the patient - they know email...
+		final String welcomeMessage = "Welcome to our service";
+		Patient pt2 = SecurePatient.fetchPatient(context, email);
+		String encryptedMessage = pt2.encrypt(welcomeMessage);	// TODO: add message sending API
+		
+		// now patient reads the message
+		assertEquals(welcomeMessage,spt.decryptUsingPrivateKey(encryptedMessage));
+				
+		// clean-up
+		context.deleteObject(episode);
+		context.deleteObject(endorsement);
+		context.deleteObject(spt.getPatient());
+		context.deleteObject(project);
+		context.deleteObject(authority);
+		context.commitChanges();		
+	}
+	
 	/**
 	 * Test simple registration.
 	 * Here a patient creates an account and manually registers to opt-in to a project.
@@ -107,15 +149,15 @@ public class TestPatients extends _ModelTest {
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setPassword(password1).setName(name).build(context);
 
 		// test project registration for a patient. Here, the service knows the NNN and date of birth.
-		Episode episode = project.registerPatientToProject(context, "1111111111", LocalDate.of(1975, 1, 1));
+		Episode episode = project.registerPatientToProject(context, nnn, dateBirth);
 
 		// and now link episode to a patient registration
-		Registration registration = spt.createRegistrationForEpisode(episode, "1111111111", LocalDate.of(1975, 1, 1));
+		Registration registration = spt.createRegistrationForEpisode(episode, nnn, dateBirth);
 		assertNotEquals(registration.getEncryptedPseudonym(), episode.getPatientPseudonym());
 		context.commitChanges();
 		
 		// and now, can we find this registration when we are a patient?
-		assertTrue(spt.getEpisodesFromRegistrations().stream().anyMatch(e -> e.getPatientPseudonym() == episode.getPatientPseudonym()));
+		assertTrue(spt.fetchEpisodesFromRegistrations().stream().anyMatch(e -> e.getPatientPseudonym() == episode.getPatientPseudonym()));
 		
 		// check that can't register when using incorrect data
 		try {
@@ -158,22 +200,22 @@ public class TestPatients extends _ModelTest {
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setPassword(password1).setName(name).build(context);
 		context.commitChanges();
 
-		assertEquals(0, spt.getEpisodes().size());
+		assertEquals(0, spt.fetchEpisodes().size());
 		
 		// project, by default, is opt-out and so assumes inclusion. Tickets generated from this episode will give access to data
-		Episode episode = project.registerPatientToProject(context, "1111111111", LocalDate.of(1975, 1, 1));
+		Episode episode = project.registerPatientToProject(context, nnn, dateBirth);
 
 		context.commitChanges();
 
 		// patient wants to opt-out... first, endorse (validate) their account - linking them to authority.   
-		Endorsement endorsement = authority.endorsePatient(spt.getPatient(), "1111111111", LocalDate.of(1975, 1, 1));
+		Endorsement endorsement = authority.endorsePatient(spt.getPatient(), nnn, dateBirth);
 
 		// now, can the patient find his/her episode?
 		// it won't be in the list of explicit episodes as this is an opt-out project.
-		assertFalse(spt.getEpisodesFromRegistrations().stream().anyMatch(e -> e.equals(episode)));
+		assertFalse(spt.fetchEpisodesFromRegistrations().stream().anyMatch(e -> e.equals(episode)));
 		
 		// so we use the endorsements to find the pseudonyms to match on episodes.
-		List<Episode> episodes = spt.getEpisodesFromEndorsements();
+		List<Episode> episodes = spt.fetchEpisodesFromEndorsements();
 		assertEquals(1, episodes.size());
 		assertEquals(episodes.get(0), episode);	// confirm that it is the episode we created
 		
