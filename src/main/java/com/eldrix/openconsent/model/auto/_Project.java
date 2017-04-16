@@ -21,6 +21,8 @@ public abstract class _Project extends CayenneDataObject {
     public static final String ID_PK_COLUMN = "id";
 
     public static final Property<String> DESCRIPTION = Property.create("description", String.class);
+    public static final Property<Boolean> MESSAGING = Property.create("messaging", Boolean.class);
+    public static final Property<String> PUBLIC_KEY = Property.create("publicKey", String.class);
     public static final Property<String> TITLE = Property.create("title", String.class);
     public static final Property<String> UUID = Property.create("uuid", String.class);
     public static final Property<Authority> AUTHORITY = Property.create("authority", Authority.class);
@@ -31,6 +33,21 @@ public abstract class _Project extends CayenneDataObject {
     }
     public String getDescription() {
         return (String)readProperty("description");
+    }
+
+    public void setMessaging(boolean messaging) {
+        writeProperty("messaging", messaging);
+    }
+	public boolean isMessaging() {
+        Boolean value = (Boolean)readProperty("messaging");
+        return (value != null) ? value.booleanValue() : false;
+    }
+
+    public void setPublicKey(String publicKey) {
+        writeProperty("publicKey", publicKey);
+    }
+    public String getPublicKey() {
+        return (String)readProperty("publicKey");
     }
 
     public void setTitle(String title) {

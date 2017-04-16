@@ -1,5 +1,6 @@
 package com.eldrix.openconsent.model;
 
+import java.security.PublicKey;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -8,19 +9,24 @@ import org.apache.cayenne.PersistenceState;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.Ordering;
+import org.apache.cayenne.validation.SimpleValidationFailure;
+import org.apache.cayenne.validation.ValidationResult;
+import org.apache.shiro.codec.Base64;
 
 import com.eldrix.openconsent.core.Pseudonymizer;
+import com.eldrix.openconsent.core.RsaService;
 import com.eldrix.openconsent.model.auto._Project;
 
 public class Project extends _Project {
     private static final long serialVersionUID = 1L; 
 
     private Pseudonymizer _pseudonymizer;
-        
+    
     @Override
     protected void onPostAdd() {
     	setUuid(java.util.UUID.randomUUID().toString());
     	_pseudonymizer = new Pseudonymizer(getUuid());
+    	setMessaging(false);
     }
 
     @Override
@@ -28,6 +34,14 @@ public class Project extends _Project {
     	_pseudonymizer = new Pseudonymizer(getUuid());    	
     }
 
+    @Override
+    protected void validateForSave(ValidationResult validationResult) {
+    	super.validateForSave(validationResult);
+    	if (isMessaging() && getPublicKey() == null) {
+    		validationResult.addFailure(new SimpleValidationFailure(this, "Must have public key to activate messaging."));
+    	}
+    }
+    
     public String calculatePseudonym(String identifier, LocalDate dateBirth) {
     	return _pseudonymizer.calculatePseudonym(identifier, dateBirth);
     }
@@ -76,4 +90,12 @@ public class Project extends _Project {
     		throw new IllegalStateException("Cannot change authority for a committed project");
     	}
     }
+    
+    /**
+	 * Encrypt data using public key
+	 */
+	public String encrypt(String data) {
+		PublicKey key = RsaService.getPublic(Base64.decode(getPublicKey()));
+		return new RsaService().encryptText(data, key);
+	}
 }
