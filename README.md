@@ -46,6 +46,8 @@ flyway:
 java -jar target/openconsent-1.0-SNAPSHOT.jar --config=config.yml --migrate
 ```
 
+> Note: currently at this early stage of development, I am editing migration #1 so use --clean to remove all database tables and then migrate to take into account changes. Once the schemas are relatively stable, any changes will be made properly in migrations.
+
 6. You can run the unit tests to check it is all working
 
 ```
@@ -57,7 +59,5 @@ mvn package
 ```
 java -jar target/openconsent-1.0-SNAPSHOT.jar --config=config.yml --server
 ```
-
-There's lots more work to do, including using asymmetric encryption to encrypt the authority-scoped pseudonyms on a per-patient basis.
 
 Mark
