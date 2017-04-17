@@ -74,6 +74,42 @@ public class ProjectSubResource {
 	}
 
 	/**
+	 * Idempotently register a patient to this project.
+	 * @param id
+	 * @param identifier
+	 * @param dateBirth
+	 * @param uriInfo
+	 * @return
+	 */
+	@PUT
+	@Path("{projectId}/register") 
+	public DataResponse<Episode> registerPatient(@PathParam("projectId") int id,
+			@QueryParam("identifier") String identifier,
+			@QueryParam("dateBirth") String dateBirth,
+			@Context UriInfo uriInfo) {
+		List<Project> projects = LinkRest.service(config).selectById(Project.class, id).getObjects();
+		if (projects.size() == 0) {
+			throw new LinkRestException(Status.NOT_FOUND, "No project found with id: "+id);
+		}
+		Project project = projects.get(0);
+		try {
+			LocalDate dateBirth2 = LocalDate.parse(dateBirth);
+			Episode episode = project.registerPatientToProject(identifier, dateBirth2);
+			episode.getObjectContext().commitChanges();
+			return LinkRest.service(config)
+					.select(Episode.class)
+					.constraint(episodeConstraint())
+					.uri(uriInfo)
+					.listener(new SingleObjectListener<Episode>(episode))
+					.get();
+		} catch (DateTimeParseException e) {
+			throw new LinkRestException(Status.BAD_REQUEST, "Invalid date of birth");
+		} catch (InvalidIdentifierException e) {
+			throw new LinkRestException(Status.BAD_REQUEST, e.getMessage());
+		}
+	}
+
+	/**
 	 * Idemopotently endorse a patient account for the authority of this project.
 	 * @param id
 	 * @param email
@@ -81,6 +117,7 @@ public class ProjectSubResource {
 	 * @param dateBirth
 	 * @param uriInfo
 	 * @return
+	 * @throws InvalidIdentifierException 
 	 */
 	@PUT
 	@Path("{projectId}/endorse")
