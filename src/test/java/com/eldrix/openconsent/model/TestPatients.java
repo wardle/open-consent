@@ -20,7 +20,7 @@ public class TestPatients extends _ModelTest {
 	final String password1 = "password";
 	final String password2 = "p455w0rd";
 	final String name = "John Smith";
-	final String nnn = "11111111111";
+	final String nnn = "1111111111";
 	final LocalDate dateBirth = LocalDate.of(1975, 1, 1);
 
 	/**
@@ -88,7 +88,7 @@ public class TestPatients extends _ModelTest {
 	}
 	
 	@Test
-	public void testComplexEncryption() {
+	public void testComplexEncryption() throws InvalidIdentifierException {
 		ObjectContext context = getRuntime().newContext();
 		// set-up authority and project
 		Authority authority = context.newObject(Authority.class);
@@ -106,7 +106,7 @@ public class TestPatients extends _ModelTest {
 		assertEquals(0, spt.fetchEpisodes().size());		// confirm that patient has no episodes, yet
 		//
 		// now our multiple sclerosis service registers the patient
-		Episode episode = project.registerPatientToProject(context, nnn, dateBirth);
+		Episode episode = project.registerPatientToProject(nnn, dateBirth);
 		context.commitChanges();
 		assertEquals(1, spt.fetchEpisodes().size());		// patient should now have one episode.
 
@@ -132,9 +132,10 @@ public class TestPatients extends _ModelTest {
 	 * Here a patient creates an account and manually registers to opt-in to a project.
 	 * 
 	 * Opt-in is quite straightforward, as consent is not permitted without a specific registration.
+	 * @throws InvalidIdentifierException 
 	 */
 	@Test
-	public void testOptIn() {
+	public void testOptIn() throws InvalidIdentifierException {
 		ObjectContext context = getRuntime().newContext();
 
 		// create a pretend project
@@ -149,7 +150,7 @@ public class TestPatients extends _ModelTest {
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(email).setPassword(password1).setName(name).build(context);
 
 		// test project registration for a patient. Here, the service knows the NNN and date of birth.
-		Episode episode = project.registerPatientToProject(context, nnn, dateBirth);
+		Episode episode = project.registerPatientToProject(nnn, dateBirth);
 
 		// and now link episode to a patient registration
 		Registration registration = spt.createRegistrationForEpisode(episode, nnn, dateBirth);
@@ -182,9 +183,10 @@ public class TestPatients extends _ModelTest {
 	 * Opt-out is much more difficult, as one has projects creating episodes for patients that
 	 * need to be linked. We do this via an authority, an endorsement of a patient's record
 	 * and the use of an authority-derived pseudonym.
+	 * @throws InvalidIdentifierException 
 	 */
 	@Test
-	public void testOptOut() {
+	public void testOptOut() throws InvalidIdentifierException {
 		ObjectContext context = getRuntime().newContext();
 
 		// create a pretend project
@@ -203,7 +205,7 @@ public class TestPatients extends _ModelTest {
 		assertEquals(0, spt.fetchEpisodes().size());
 		
 		// project, by default, is opt-out and so assumes inclusion. Tickets generated from this episode will give access to data
-		Episode episode = project.registerPatientToProject(context, nnn, dateBirth);
+		Episode episode = project.registerPatientToProject(nnn, dateBirth);
 
 		context.commitChanges();
 

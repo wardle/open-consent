@@ -46,7 +46,7 @@ public class Authority extends _Authority {
      * @param dateBirth
      * @return
      */
-    public String calculateAuthorityPseudonym(String identifier, LocalDate dateBirth) {
+    protected String calculateAuthorityPseudonym(String identifier, LocalDate dateBirth) {
     	return pseudonymizer().calculatePseudonym(identifier, dateBirth);
     }
     
@@ -62,8 +62,12 @@ public class Authority extends _Authority {
      * @param identifier
      * @param dateBirth
      * @return
+     * @throws InvalidIdentifierException 
      */
-    public Endorsement endorsePatient(Patient patient, String identifier, LocalDate dateBirth) {
+    public Endorsement endorsePatient(Patient patient, String identifier, LocalDate dateBirth) throws InvalidIdentifierException {
+    	if (isValidIdentifier(identifier) == false) {
+    		throw new InvalidIdentifierException(identifier);
+    	}
     	return patient.getEndorsements().stream().filter(e -> e.getAuthority() == this).findAny().orElseGet(() -> {{
     		return _createEndorsement(patient, identifier, dateBirth);
     	}});

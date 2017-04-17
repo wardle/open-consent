@@ -4,7 +4,6 @@ import java.security.PublicKey;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.PersistenceState;
 import org.apache.cayenne.exp.Expression;
 import org.apache.cayenne.query.ObjectSelect;
@@ -54,16 +53,20 @@ public class Project extends _Project {
      * 
      * @param pseudonym
      * @return
+     * @throws InvalidIdentifierException 
      */
-    public Episode registerPatientToProject(ObjectContext context, String identifier, LocalDate dateBirth) {
+    public Episode registerPatientToProject(String identifier, LocalDate dateBirth) throws InvalidIdentifierException {
+    	if (getAuthority().isValidIdentifier(identifier) == false) {
+    		throw new InvalidIdentifierException(identifier);
+    	}
     	String pseudonym = calculatePseudonym(identifier, dateBirth);
     	Expression e1 = Episode.PATIENT_PSEUDONYM.eq(pseudonym);
     	Expression e2 = Episode.PROJECT.eq(this);
     	List<Ordering> ordering = Episode.DATE_REGISTRATION.descs();
-    	List<Episode> episodes = ObjectSelect.query(Episode.class, e1.andExp(e2), ordering).select(context);
+    	List<Episode> episodes = ObjectSelect.query(Episode.class, e1.andExp(e2), ordering).select(getObjectContext());
     	Episode result;
     	if (episodes.isEmpty()) {
-    		result = context.newObject(Episode.class);
+    		result = getObjectContext().newObject(Episode.class);
     		result.setProject(this);
     		result.setDateRegistration(LocalDate.now());
     		result.setPatientPseudonym(pseudonym);

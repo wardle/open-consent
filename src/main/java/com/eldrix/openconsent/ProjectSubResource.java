@@ -20,6 +20,8 @@ import javax.ws.rs.core.UriInfo;
 import com.eldrix.openconsent.core.SingleObjectListener;
 import com.eldrix.openconsent.model.Authority;
 import com.eldrix.openconsent.model.Endorsement;
+import com.eldrix.openconsent.model.Episode;
+import com.eldrix.openconsent.model.InvalidIdentifierException;
 import com.eldrix.openconsent.model.Patient;
 import com.eldrix.openconsent.model.Project;
 import com.eldrix.openconsent.model.SecurePatient;
@@ -111,7 +113,14 @@ public class ProjectSubResource {
 					.get();
 		} catch (DateTimeParseException e) {
 			throw new LinkRestException(Status.BAD_REQUEST, "Invalid date of birth", e);
+		} catch (InvalidIdentifierException e) {
+			throw new LinkRestException(Status.BAD_REQUEST, e.getMessage());
 		}
+	}
+
+	public static Constraint<Episode> episodeConstraint() {
+		return Constraint.idOnly(Episode.class).
+				attributes(Episode.DATE_REGISTRATION, Episode.PATIENT_PSEUDONYM);
 	}
 	
 	public static Constraint<Endorsement> endorsementConstraint() {
