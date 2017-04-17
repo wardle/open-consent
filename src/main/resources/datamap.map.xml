@@ -12,6 +12,25 @@
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
+	<db-entity name="t_consent_form" schema="public">
+		<db-attribute name="created_date_time" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="final_date_time" type="TIMESTAMP"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
+		<db-attribute name="information" type="LONGVARCHAR"/>
+		<db-attribute name="project_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="status" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="title" type="LONGVARCHAR" isMandatory="true"/>
+		<db-attribute name="version_string" type="VARCHAR" isMandatory="true" length="255"/>
+	</db-entity>
+	<db-entity name="t_consent_item" schema="public">
+		<db-attribute name="behaviour" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="consent_form_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="description" type="LONGVARCHAR" isMandatory="true"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
+		<db-attribute name="ordering" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="title" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="type" type="VARCHAR" isMandatory="true" length="64"/>
+	</db-entity>
 	<db-entity name="t_endorsement" schema="public">
 		<db-attribute name="authority_fk" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="encrypted_authority_pseudonym" type="VARCHAR" isMandatory="true" length="255"/>
@@ -35,6 +54,18 @@
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
 		<db-attribute name="public_key" type="CLOB" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="t_permission_form" schema="public">
+		<db-attribute name="consent_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="date_time_created" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="episode_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="t_permission_item" schema="public">
+		<db-attribute name="consent_item_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
+		<db-attribute name="permission_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="response" type="VARCHAR" isMandatory="true" length="64"/>
+	</db-entity>
 	<db-entity name="t_project" schema="public">
 		<db-attribute name="authority_fk" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="description" type="CLOB" length="2147483647"/>
@@ -56,6 +87,22 @@
 		<post-add method-name="onPostAdd"/>
 		<post-load method-name="onPostLoad"/>
 	</obj-entity>
+	<obj-entity name="ConsentForm" className="com.eldrix.openconsent.model.ConsentForm" lock-type="optimistic" dbEntityName="t_consent_form">
+		<obj-attribute name="createdDateTime" type="java.time.LocalDateTime" db-attribute-path="created_date_time"/>
+		<obj-attribute name="finalDateTime" type="java.time.LocalDateTime" db-attribute-path="final_date_time"/>
+		<obj-attribute name="information" type="java.lang.String" db-attribute-path="information"/>
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="title"/>
+		<obj-attribute name="status" type="com.eldrix.openconsent.model.ConsentFormStatus" db-attribute-path="status"/>
+		<obj-attribute name="versionString" type="java.lang.String" db-attribute-path="version_string"/>
+		<post-add method-name="onPostAdd"/>
+	</obj-entity>
+	<obj-entity name="ConsentItem" className="com.eldrix.openconsent.model.ConsentItem" lock-type="optimistic" dbEntityName="t_consent_item">
+		<obj-attribute name="behaviour" type="java.lang.String" db-attribute-path="behaviour"/>
+		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
+		<obj-attribute name="ordering" type="int" db-attribute-path="ordering"/>
+		<obj-attribute name="title" type="java.lang.String" db-attribute-path="title"/>
+		<obj-attribute name="type" type="com.eldrix.openconsent.model.ConsentType" db-attribute-path="type"/>
+	</obj-entity>
 	<obj-entity name="Endorsement" className="com.eldrix.openconsent.model.Endorsement" lock-type="optimistic" dbEntityName="t_endorsement">
 		<obj-attribute name="encryptedAuthorityPseudonym" type="java.lang.String" db-attribute-path="encrypted_authority_pseudonym"/>
 	</obj-entity>
@@ -73,6 +120,14 @@
 		<obj-attribute name="hashedPassword" type="java.lang.String" db-attribute-path="hashed_password"/>
 		<obj-attribute name="publicKey" type="java.lang.String" db-attribute-path="public_key"/>
 	</obj-entity>
+	<obj-entity name="PermissionForm" className="com.eldrix.openconsent.model.PermissionForm" lock-type="optimistic" dbEntityName="t_permission_form">
+		<obj-attribute name="dateTimeCreated" type="java.time.LocalDateTime" db-attribute-path="date_time_created"/>
+		<obj-attribute name="episodeFk" type="int" db-attribute-path="episode_fk"/>
+		<post-add method-name="onPostAdd"/>
+	</obj-entity>
+	<obj-entity name="PermissionItem" className="com.eldrix.openconsent.model.PermissionItem" lock-type="optimistic" dbEntityName="t_permission_item">
+		<obj-attribute name="response" type="com.eldrix.openconsent.model.PermissionResponse" db-attribute-path="response"/>
+	</obj-entity>
 	<obj-entity name="Project" className="com.eldrix.openconsent.model.Project" lock-type="optimistic" dbEntityName="t_project">
 		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
 		<obj-attribute name="messaging" type="boolean" db-attribute-path="messaging"/>
@@ -87,6 +142,15 @@
 	</obj-entity>
 	<db-relationship name="projects" source="t_authority" target="t_project" toMany="true">
 		<db-attribute-pair source="id" target="authority_fk"/>
+	</db-relationship>
+	<db-relationship name="items" source="t_consent_form" target="t_consent_item" toMany="true">
+		<db-attribute-pair source="id" target="consent_form_fk"/>
+	</db-relationship>
+	<db-relationship name="project" source="t_consent_form" target="t_project" toMany="false">
+		<db-attribute-pair source="project_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="consent_form" source="t_consent_item" target="t_consent_form" toMany="false">
+		<db-attribute-pair source="consent_form_fk" target="id"/>
 	</db-relationship>
 	<db-relationship name="authority" source="t_endorsement" target="t_authority" toMany="false">
 		<db-attribute-pair source="authority_fk" target="id"/>
@@ -103,8 +167,23 @@
 	<db-relationship name="registrations" source="t_patient" target="t_registration" toMany="true">
 		<db-attribute-pair source="id" target="patient_fk"/>
 	</db-relationship>
+	<db-relationship name="consent" source="t_permission_form" target="t_consent_form" toMany="false">
+		<db-attribute-pair source="consent_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="permissionItems" source="t_permission_form" target="t_permission_item" toMany="true">
+		<db-attribute-pair source="id" target="permission_fk"/>
+	</db-relationship>
+	<db-relationship name="consentItem" source="t_permission_item" target="t_consent_item" toMany="false">
+		<db-attribute-pair source="consent_item_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="permission" source="t_permission_item" target="t_permission_form" toMany="false">
+		<db-attribute-pair source="permission_fk" target="id"/>
+	</db-relationship>
 	<db-relationship name="authority" source="t_project" target="t_authority" toMany="false">
 		<db-attribute-pair source="authority_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="consent_forms" source="t_project" target="t_consent_form" toMany="true">
+		<db-attribute-pair source="id" target="project_fk"/>
 	</db-relationship>
 	<db-relationship name="episodes" source="t_project" target="t_episode" toMany="true">
 		<db-attribute-pair source="id" target="project_fk"/>
@@ -113,11 +192,18 @@
 		<db-attribute-pair source="patient_fk" target="id"/>
 	</db-relationship>
 	<obj-relationship name="projects" source="Authority" target="Project" deleteRule="Deny" db-relationship-path="projects"/>
+	<obj-relationship name="consentItems" source="ConsentForm" target="ConsentItem" deleteRule="Deny" db-relationship-path="items"/>
+	<obj-relationship name="project" source="ConsentForm" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
+	<obj-relationship name="consentForm" source="ConsentItem" target="ConsentForm" deleteRule="Nullify" db-relationship-path="consent_form"/>
 	<obj-relationship name="authority" source="Endorsement" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
 	<obj-relationship name="patient" source="Endorsement" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
 	<obj-relationship name="endorsements" source="Patient" target="Endorsement" deleteRule="Cascade" db-relationship-path="endorsements"/>
 	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Cascade" db-relationship-path="registrations"/>
+	<obj-relationship name="consentForm" source="PermissionForm" target="ConsentForm" deleteRule="Nullify" db-relationship-path="consent"/>
+	<obj-relationship name="permissionItems" source="PermissionForm" target="PermissionItem" deleteRule="Deny" db-relationship-path="permissionItems"/>
+	<obj-relationship name="consentItem" source="PermissionItem" target="ConsentItem" deleteRule="Nullify" db-relationship-path="consentItem"/>
+	<obj-relationship name="permissionForm" source="PermissionItem" target="PermissionForm" deleteRule="Nullify" db-relationship-path="permission"/>
 	<obj-relationship name="authority" source="Project" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
 	<obj-relationship name="episodes" source="Project" target="Episode" deleteRule="Deny" db-relationship-path="episodes"/>
 	<obj-relationship name="patient" source="Registration" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>

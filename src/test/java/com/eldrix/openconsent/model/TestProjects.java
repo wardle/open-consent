@@ -10,32 +10,14 @@ import java.security.KeyPair;
 import java.time.LocalDate;
 
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.validation.ValidationResult;
 import org.apache.shiro.codec.Base64;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.eldrix.openconsent.core.RsaService;
 
-import io.bootique.test.BQTestRuntime;
-import io.bootique.test.junit.BQTestFactory;
+public class TestProjects extends _ModelTest {
 
-public class TestProjects {
-
-	@Rule
-	public BQTestFactory testFactory = new BQTestFactory();
-	
-	private ServerRuntime _cayenne;
-	
-	public ServerRuntime getRuntime() {
-		if (_cayenne == null) {
-			BQTestRuntime runtime = testFactory.app("-c","classpath:config-test.yml").autoLoadModules().createRuntime();
-			_cayenne = runtime.getRuntime().getInstance(ServerRuntime.class);
-		}
-		return _cayenne;
-	}
-	
 	@Test
 	public void testProjects() {
 		ObjectContext context = getRuntime().newContext();
