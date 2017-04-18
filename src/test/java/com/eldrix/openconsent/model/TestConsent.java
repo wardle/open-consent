@@ -87,7 +87,32 @@ public class TestConsent extends _ModelTest {
 		assertEquals(ConsentFormStatus.FINAL, consentForm.getCommittedStatus());
 		assertEquals(ConsentFormStatus.FINAL, consentForm.getStatus());
 		
+		// let's try and make it draft so we can nefariously edit the form after patients have seen it.
+		ValidationResult validationResult = new ValidationResult();
+		consentForm.validateForSave(validationResult);
+		assertFalse(validationResult.hasFailures());
+		consentForm.setStatus(ConsentFormStatus.DRAFT);
+		consentForm.validateForSave(validationResult);
+		assertTrue(validationResult.hasFailures());
 		
+		// but I can deprecate the form
+		validationResult.clear();
+		consentForm.setStatus(ConsentFormStatus.DEPRECATED);
+		consentForm.validateForSave(validationResult);
+		assertFalse(validationResult.hasFailures());
+		context.commitChanges();
+		
+		// and now can't do anything with it at all
+		validationResult.clear();
+		consentForm.setStatus(ConsentFormStatus.DRAFT);
+		consentForm.validateForSave(validationResult);
+		assertTrue(validationResult.hasFailures());
+		validationResult.clear();
+		consentForm.setStatus(ConsentFormStatus.FINAL);
+		consentForm.validateForSave(validationResult);
+		assertTrue(validationResult.hasFailures());
+				
+		// clean-up
 		context.deleteObject(consentForm);	// cascade delete items...
 		context.deleteObject(p1);
 		context.deleteObject(authority);

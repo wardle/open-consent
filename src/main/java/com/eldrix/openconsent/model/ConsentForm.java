@@ -26,7 +26,10 @@ public class ConsentForm extends _ConsentForm {
 		super.validateForSave(validationResult);
 		ConsentFormStatus committed = getCommittedStatus();
 		if (ConsentFormStatus.FINAL == committed && ConsentFormStatus.DRAFT == getStatus()) {
-			validationResult.addFailure(new SimpleValidationFailure(this, "Cannot change status to DRAFT once it is FINAL."));
+			validationResult.addFailure(new SimpleValidationFailure(this, "Once a form is FINAL, it cannot be changed to DRAFT."));
+		}
+		if (ConsentFormStatus.DEPRECATED == committed && ConsentFormStatus.DEPRECATED != getStatus()) {
+			validationResult.addFailure(new SimpleValidationFailure(this, "Once a form is DEPRECATED, it cannot be changed."));
 		}
 		if (ConsentFormStatus.FINAL == getStatus() && getFinalDateTime() == null) {
 			validationResult.addFailure(new SimpleValidationFailure(this, "Date/time must be set when consent form finalised."));
