@@ -25,8 +25,8 @@ public abstract class _ConsentForm extends CayenneDataObject {
     public static final Property<LocalDateTime> CREATED_DATE_TIME = Property.create("createdDateTime", LocalDateTime.class);
     public static final Property<LocalDateTime> FINAL_DATE_TIME = Property.create("finalDateTime", LocalDateTime.class);
     public static final Property<String> INFORMATION = Property.create("information", String.class);
-    public static final Property<String> NAME = Property.create("name", String.class);
     public static final Property<ConsentFormStatus> STATUS = Property.create("status", ConsentFormStatus.class);
+    public static final Property<String> TITLE = Property.create("title", String.class);
     public static final Property<String> VERSION_STRING = Property.create("versionString", String.class);
     public static final Property<List<ConsentItem>> CONSENT_ITEMS = Property.create("consentItems", List.class);
     public static final Property<Project> PROJECT = Property.create("project", Project.class);
@@ -52,18 +52,18 @@ public abstract class _ConsentForm extends CayenneDataObject {
         return (String)readProperty("information");
     }
 
-    public void setName(String name) {
-        writeProperty("name", name);
-    }
-    public String getName() {
-        return (String)readProperty("name");
-    }
-
     public void setStatus(ConsentFormStatus status) {
         writeProperty("status", status);
     }
     public ConsentFormStatus getStatus() {
         return (ConsentFormStatus)readProperty("status");
+    }
+
+    public void setTitle(String title) {
+        writeProperty("title", title);
+    }
+    public String getTitle() {
+        return (String)readProperty("title");
     }
 
     public void setVersionString(String versionString) {

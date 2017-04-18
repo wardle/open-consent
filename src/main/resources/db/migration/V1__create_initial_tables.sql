@@ -12,7 +12,7 @@ CREATE TABLE t_endorsement (authority_fk integer NOT NULL, encrypted_authority_p
 
 CREATE TABLE t_consent_form (created_date_time TIMESTAMP NOT NULL, final_date_time TIMESTAMP NULL, id SERIAL PRIMARY KEY, information text NULL, project_fk INTEGER NOT NULL, status VARCHAR(64) NOT NULL, title text NOT NULL, version_string VARCHAR(255) NOT NULL);
 
-CREATE TABLE t_consent_item (behaviour VARCHAR(255) NOT NULL, consent_form_fk INTEGER NOT NULL, description text NOT NULL, id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, ordering INTEGER NOT NULL, type VARCHAR(64) not null);
+CREATE TABLE t_consent_item (behaviour VARCHAR(255) NOT NULL, consent_form_fk INTEGER NOT NULL, description text NOT NULL, id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, ordering INTEGER NOT NULL, type VARCHAR(64) not null);
 
 CREATE TABLE t_permission_form (consent_form_fk INTEGER NOT NULL, date_time_created TIMESTAMP NOT NULL, episode_fk INTEGER NOT NULL, id SERIAL primary key);
 

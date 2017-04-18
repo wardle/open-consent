@@ -91,8 +91,8 @@
 		<obj-attribute name="createdDateTime" type="java.time.LocalDateTime" db-attribute-path="created_date_time"/>
 		<obj-attribute name="finalDateTime" type="java.time.LocalDateTime" db-attribute-path="final_date_time"/>
 		<obj-attribute name="information" type="java.lang.String" db-attribute-path="information"/>
-		<obj-attribute name="name" type="java.lang.String" db-attribute-path="title"/>
 		<obj-attribute name="status" type="com.eldrix.openconsent.model.ConsentFormStatus" db-attribute-path="status"/>
+		<obj-attribute name="title" type="java.lang.String" db-attribute-path="title"/>
 		<obj-attribute name="versionString" type="java.lang.String" db-attribute-path="version_string"/>
 		<post-add method-name="onPostAdd"/>
 	</obj-entity>
@@ -192,7 +192,7 @@
 		<db-attribute-pair source="patient_fk" target="id"/>
 	</db-relationship>
 	<obj-relationship name="projects" source="Authority" target="Project" deleteRule="Deny" db-relationship-path="projects"/>
-	<obj-relationship name="consentItems" source="ConsentForm" target="ConsentItem" deleteRule="Deny" db-relationship-path="items"/>
+	<obj-relationship name="consentItems" source="ConsentForm" target="ConsentItem" deleteRule="Cascade" db-relationship-path="items"/>
 	<obj-relationship name="project" source="ConsentForm" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
 	<obj-relationship name="consentForm" source="ConsentItem" target="ConsentForm" deleteRule="Nullify" db-relationship-path="consent_form"/>
 	<obj-relationship name="authority" source="Endorsement" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
