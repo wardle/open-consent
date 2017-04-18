@@ -22,8 +22,8 @@ public abstract class _ConsentForm extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
-    public static final Property<LocalDateTime> CREATED_DATE_TIME = Property.create("createdDateTime", LocalDateTime.class);
-    public static final Property<LocalDateTime> FINAL_DATE_TIME = Property.create("finalDateTime", LocalDateTime.class);
+    public static final Property<LocalDateTime> DATE_TIME_CREATED = Property.create("dateTimeCreated", LocalDateTime.class);
+    public static final Property<LocalDateTime> DATE_TIME_FINALISED = Property.create("dateTimeFinalised", LocalDateTime.class);
     public static final Property<String> INFORMATION = Property.create("information", String.class);
     public static final Property<ConsentFormStatus> STATUS = Property.create("status", ConsentFormStatus.class);
     public static final Property<String> TITLE = Property.create("title", String.class);
@@ -31,18 +31,18 @@ public abstract class _ConsentForm extends CayenneDataObject {
     public static final Property<List<ConsentItem>> CONSENT_ITEMS = Property.create("consentItems", List.class);
     public static final Property<Project> PROJECT = Property.create("project", Project.class);
 
-    public void setCreatedDateTime(LocalDateTime createdDateTime) {
-        writeProperty("createdDateTime", createdDateTime);
+    public void setDateTimeCreated(LocalDateTime dateTimeCreated) {
+        writeProperty("dateTimeCreated", dateTimeCreated);
     }
-    public LocalDateTime getCreatedDateTime() {
-        return (LocalDateTime)readProperty("createdDateTime");
+    public LocalDateTime getDateTimeCreated() {
+        return (LocalDateTime)readProperty("dateTimeCreated");
     }
 
-    public void setFinalDateTime(LocalDateTime finalDateTime) {
-        writeProperty("finalDateTime", finalDateTime);
+    public void setDateTimeFinalised(LocalDateTime dateTimeFinalised) {
+        writeProperty("dateTimeFinalised", dateTimeFinalised);
     }
-    public LocalDateTime getFinalDateTime() {
-        return (LocalDateTime)readProperty("finalDateTime");
+    public LocalDateTime getDateTimeFinalised() {
+        return (LocalDateTime)readProperty("dateTimeFinalised");
     }
 
     public void setInformation(String information) {

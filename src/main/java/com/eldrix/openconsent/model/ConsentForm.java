@@ -17,7 +17,7 @@ public class ConsentForm extends _ConsentForm {
 
 	@Override
 	protected void onPostAdd() {
-		setCreatedDateTime(LocalDateTime.now());
+		setDateTimeCreated(LocalDateTime.now());
 		setStatus(ConsentFormStatus.DRAFT);
 	}
 
@@ -31,7 +31,7 @@ public class ConsentForm extends _ConsentForm {
 		if (ConsentFormStatus.DEPRECATED == committed && ConsentFormStatus.DEPRECATED != getStatus()) {
 			validationResult.addFailure(new SimpleValidationFailure(this, "Once a form is DEPRECATED, it cannot be changed."));
 		}
-		if (ConsentFormStatus.FINAL == getStatus() && getFinalDateTime() == null) {
+		if (ConsentFormStatus.FINAL == getStatus() && getDateTimeFinalised() == null) {
 			validationResult.addFailure(new SimpleValidationFailure(this, "Date/time must be set when consent form finalised."));
 		}
 	}
@@ -40,7 +40,7 @@ public class ConsentForm extends _ConsentForm {
 	public void setStatus(ConsentFormStatus status) {
 		ConsentFormStatus committed = getCommittedStatus();
 		if (ConsentFormStatus.FINAL != committed && ConsentFormStatus.FINAL == status) {
-			setFinalDateTime(LocalDateTime.now());
+			setDateTimeFinalised(LocalDateTime.now());
 		}
 		super.setStatus(status);
 	}

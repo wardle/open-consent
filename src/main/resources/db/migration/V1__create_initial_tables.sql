@@ -10,7 +10,7 @@ CREATE TABLE t_registration (id serial primary key, encrypted_pseudonym text NOT
 
 CREATE TABLE t_endorsement (authority_fk integer NOT NULL, encrypted_authority_pseudonym varchar(255) NOT NULL, id serial PRIMARY KEY, patient_fk integer NOT NULL);
 
-CREATE TABLE t_consent_form (created_date_time TIMESTAMP NOT NULL, final_date_time TIMESTAMP NULL, id SERIAL PRIMARY KEY, information text NULL, project_fk INTEGER NOT NULL, status VARCHAR(64) NOT NULL, title text NOT NULL, version_string VARCHAR(255) NOT NULL);
+CREATE TABLE t_consent_form (date_time_created TIMESTAMP NOT NULL, date_time_finalised TIMESTAMP NULL, id SERIAL PRIMARY KEY, information text NULL, project_fk INTEGER NOT NULL, status VARCHAR(64) NOT NULL, title text NOT NULL, version_string VARCHAR(255) NOT NULL);
 
 CREATE TABLE t_consent_item (behaviour VARCHAR(255) NOT NULL, consent_form_fk INTEGER NOT NULL, description text NOT NULL, id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL, ordering INTEGER NOT NULL, type VARCHAR(64) not null);
 

@@ -13,8 +13,8 @@
 		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
 	<db-entity name="t_consent_form" schema="public">
-		<db-attribute name="created_date_time" type="TIMESTAMP" isMandatory="true"/>
-		<db-attribute name="final_date_time" type="TIMESTAMP"/>
+		<db-attribute name="date_time_created" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="date_time_finalised" type="TIMESTAMP"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
 		<db-attribute name="information" type="LONGVARCHAR"/>
 		<db-attribute name="project_fk" type="INTEGER" isMandatory="true"/>
@@ -88,8 +88,8 @@
 		<post-load method-name="onPostLoad"/>
 	</obj-entity>
 	<obj-entity name="ConsentForm" className="com.eldrix.openconsent.model.ConsentForm" lock-type="optimistic" dbEntityName="t_consent_form">
-		<obj-attribute name="createdDateTime" type="java.time.LocalDateTime" db-attribute-path="created_date_time"/>
-		<obj-attribute name="finalDateTime" type="java.time.LocalDateTime" db-attribute-path="final_date_time"/>
+		<obj-attribute name="dateTimeCreated" type="java.time.LocalDateTime" db-attribute-path="date_time_created"/>
+		<obj-attribute name="dateTimeFinalised" type="java.time.LocalDateTime" db-attribute-path="date_time_finalised"/>
 		<obj-attribute name="information" type="java.lang.String" db-attribute-path="information"/>
 		<obj-attribute name="status" type="com.eldrix.openconsent.model.ConsentFormStatus" db-attribute-path="status"/>
 		<obj-attribute name="title" type="java.lang.String" db-attribute-path="title"/>
