@@ -141,23 +141,19 @@ public class TestConsent extends _ModelTest {
 	
 	
 	@Test
-	public void testOptOut() throws InvalidIdentifierException {
+	public void testPermissions() throws InvalidIdentifierException {
 		ObjectContext context = getRuntime().newContext();
-
-		// the patient registers an account
-		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
-		context.commitChanges();
 
 		// create a basic project and consent form
 		ConsentForm consentForm = createBasicConsentForm(context);
 		consentForm.setStatus(ConsentFormStatus.FINAL);
-		context.commitChanges();
 
+		// the patient registers an account
+		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
 		Project project = consentForm.getProject();
 		Endorsement endorsement = project.getAuthority().endorsePatient(spt.getPatient(), ExamplePatient.nnn, ExamplePatient.dateBirth);
 		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		context.commitChanges();
-
 		// check that the defaults apply for this:
 		assertEquals(PermissionResponse.AGREE, episode.permissionFor("PARTICIPATE"));		// implicit
 		assertEquals(PermissionResponse.DISAGREE, episode.permissionFor("COMMUNICATION"));	// explicit
@@ -174,7 +170,6 @@ public class TestConsent extends _ModelTest {
 			perm.setResponse(PermissionResponse.AGREE);		// agree to everything
 			perm.setPermissionForm(permissionForm);
 		});
-		context.commitChanges();
 		
 		// now pretend we are a project that knows nothing except the patient details
 		Episode e3 = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
