@@ -7,6 +7,7 @@ import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.exp.Property;
 
 import com.eldrix.openconsent.model.ConsentForm;
+import com.eldrix.openconsent.model.Episode;
 import com.eldrix.openconsent.model.PermissionItem;
 
 /**
@@ -24,6 +25,7 @@ public abstract class _PermissionForm extends CayenneDataObject {
     public static final Property<LocalDateTime> DATE_TIME_CREATED = Property.create("dateTimeCreated", LocalDateTime.class);
     public static final Property<Integer> EPISODE_FK = Property.create("episodeFk", Integer.class);
     public static final Property<ConsentForm> CONSENT_FORM = Property.create("consentForm", ConsentForm.class);
+    public static final Property<Episode> EPISODE = Property.create("episode", Episode.class);
     public static final Property<List<PermissionItem>> PERMISSION_ITEMS = Property.create("permissionItems", List.class);
 
     public void setDateTimeCreated(LocalDateTime dateTimeCreated) {
@@ -47,6 +49,15 @@ public abstract class _PermissionForm extends CayenneDataObject {
 
     public ConsentForm getConsentForm() {
         return (ConsentForm)readProperty("consentForm");
+    }
+
+
+    public void setEpisode(Episode episode) {
+        setToOneTarget("episode", episode, true);
+    }
+
+    public Episode getEpisode() {
+        return (Episode)readProperty("episode");
     }
 
 

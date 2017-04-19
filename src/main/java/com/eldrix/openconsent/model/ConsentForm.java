@@ -1,6 +1,9 @@
 package com.eldrix.openconsent.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
@@ -45,6 +48,16 @@ public class ConsentForm extends _ConsentForm {
 		super.setStatus(status);
 	}
 
+	/**
+	 * Return an ordered list of the consent items.
+	 * @return
+	 */
+	public List<ConsentItem> getOrderedConsentItems() {
+		ArrayList<ConsentItem> ordered = new ArrayList<>(getConsentItems());
+		Collections.sort(ordered);
+		return Collections.unmodifiableList(ordered);
+	}
+	
 	/**
 	 * Return the committed value for the status.
 	 * TODO: mark: make this less of a hack, and make generic and place into a utilities class.

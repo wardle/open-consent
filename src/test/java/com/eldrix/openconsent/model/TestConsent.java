@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.LocalDate;
+
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.validation.ValidationResult;
 import org.junit.Test;
@@ -56,24 +58,10 @@ public class TestConsent extends _ModelTest {
 	@Test
 	public void testConsentFormLifecycle() {
 		ObjectContext context = getRuntime().newContext();
-		Authority authority = context.newObject(Authority.class);
-		authority.setName("NHS");
-		authority.setLogic(AuthorityLogic.UK_NHS);
-		Project p1 = context.newObject(Project.class);
-		p1.setTitle("Project title");
-		p1.setAuthority(authority);
-
-		ConsentForm consentForm = context.newObject(ConsentForm.class);
-		ConsentItem item1 = createParticipateConsentItem(context, 1);
-		ConsentItem item2 = createCommunicationConsentItem(context, 2);
-		consentForm.addToConsentItems(item1);
-		consentForm.addToConsentItems(item2);
-		consentForm.setProject(p1);
-		consentForm.setTitle("Patient consent form"); 
-		consentForm.setVersionString("1");
-		assertNotNull(consentForm.getCreatedDateTime());
+		ConsentForm consentForm = createBasicConsentForm(context);
+		assertNotNull(consentForm.getDateTimeCreated());
 		assertEquals(ConsentFormStatus.DRAFT, consentForm.getStatus());		// created should be draft
-		assertNull(consentForm.getFinalDateTime());		// should have no final date
+		assertNull(consentForm.getDateTimeFinalised());		// should have no final date
 		assertNull(consentForm.getCommittedStatus());	// not yet committed to database
 		context.commitChanges();
 		
@@ -113,9 +101,70 @@ public class TestConsent extends _ModelTest {
 		assertTrue(validationResult.hasFailures());
 				
 		// clean-up
-		context.deleteObject(consentForm);	// cascade delete items...
-		context.deleteObject(p1);
-		context.deleteObject(authority);
+		context.deleteObjects(consentForm,
+				consentForm.getProject(), consentForm.getProject().getAuthority()
+				);
 		context.commitChanges();
+	}
+	
+	
+	@Test
+	public void testPermissions() throws InvalidIdentifierException {
+		ObjectContext context = getRuntime().newContext();
+		ConsentForm consentForm = createBasicConsentForm(context);
+		context.commitChanges();
+		Episode episode = consentForm.getProject().registerPatientToProject("1111111111", LocalDate.of(1975, 1, 1));
+		PermissionForm permissionForm = context.newObject(PermissionForm.class);
+		permissionForm.setConsentForm(consentForm);
+		permissionForm.setEpisode(episode);
+		ValidationResult validationResult = new ValidationResult();
+		permissionForm.validateForSave(validationResult);
+		assertTrue(validationResult.hasFailures());		// can't create permissions until consent form is finalised
+		consentForm.setStatus(ConsentFormStatus.FINAL);
+		validationResult.clear();
+		permissionForm.validateForSave(validationResult);
+		System.out.println(validationResult);
+		assertTrue(validationResult.hasFailures());		// missing permission items
+
+		// add missing permission items
+		consentForm.getConsentItems().forEach(item -> {
+			PermissionItem perm = context.newObject(PermissionItem.class);
+			perm.setConsentItem(item);
+			perm.setResponse(PermissionResponse.AGREE);
+			perm.setPermissionForm(permissionForm);
+		});
+		
+		validationResult.clear();
+		permissionForm.validateForSave(validationResult);
+		assertFalse(validationResult.hasFailures());
+		
+		// clean-up
+		context.deleteObjects(
+				episode, 
+				permissionForm,
+				consentForm,
+				consentForm.getProject(), consentForm.getProject().getAuthority()
+				);
+		context.commitChanges();
+		
+	}
+	
+	protected ConsentForm createBasicConsentForm(ObjectContext context) {
+		Authority authority = context.newObject(Authority.class);
+		authority.setName("NHS");
+		authority.setLogic(AuthorityLogic.UK_NHS);
+		Project p1 = context.newObject(Project.class);
+		p1.setTitle("Project title");
+		p1.setAuthority(authority);
+
+		ConsentForm consentForm = context.newObject(ConsentForm.class);
+		ConsentItem item1 = createParticipateConsentItem(context, 1);
+		ConsentItem item2 = createCommunicationConsentItem(context, 2);
+		consentForm.addToConsentItems(item1);
+		consentForm.addToConsentItems(item2);
+		consentForm.setProject(p1);
+		consentForm.setTitle("Patient consent form"); 
+		consentForm.setVersionString("1");
+		return consentForm;
 	}
 }

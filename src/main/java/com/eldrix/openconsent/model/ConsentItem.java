@@ -5,7 +5,7 @@ import org.apache.cayenne.validation.ValidationResult;
 
 import com.eldrix.openconsent.model.auto._ConsentItem;
 
-public class ConsentItem extends _ConsentItem {
+public class ConsentItem extends _ConsentItem implements Comparable<ConsentItem> {
 
     private static final long serialVersionUID = 1L; 
 
@@ -23,4 +23,9 @@ public class ConsentItem extends _ConsentItem {
     		validationResult.addFailure(new SimpleValidationFailure(this, "Ordering must be unique for items within a consent form."));
     	}
     }
+
+	@Override
+	public int compareTo(ConsentItem o) {
+		return this.getOrdering() - o.getOrdering();
+	}    
 }

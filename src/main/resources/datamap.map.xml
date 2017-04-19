@@ -158,6 +158,9 @@
 	<db-relationship name="patient" source="t_endorsement" target="t_patient" toMany="false">
 		<db-attribute-pair source="patient_fk" target="id"/>
 	</db-relationship>
+	<db-relationship name="permissionForms" source="t_episode" target="t_permission_form" toMany="true">
+		<db-attribute-pair source="id" target="episode_fk"/>
+	</db-relationship>
 	<db-relationship name="project" source="t_episode" target="t_project" toMany="false">
 		<db-attribute-pair source="project_fk" target="id"/>
 	</db-relationship>
@@ -169,6 +172,9 @@
 	</db-relationship>
 	<db-relationship name="consent" source="t_permission_form" target="t_consent_form" toMany="false">
 		<db-attribute-pair source="consent_fk" target="id"/>
+	</db-relationship>
+	<db-relationship name="episode" source="t_permission_form" target="t_episode" toMany="false">
+		<db-attribute-pair source="episode_fk" target="id"/>
 	</db-relationship>
 	<db-relationship name="permissionItems" source="t_permission_form" target="t_permission_item" toMany="true">
 		<db-attribute-pair source="id" target="permission_fk"/>
@@ -201,7 +207,8 @@
 	<obj-relationship name="endorsements" source="Patient" target="Endorsement" deleteRule="Cascade" db-relationship-path="endorsements"/>
 	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Cascade" db-relationship-path="registrations"/>
 	<obj-relationship name="consentForm" source="PermissionForm" target="ConsentForm" deleteRule="Nullify" db-relationship-path="consent"/>
-	<obj-relationship name="permissionItems" source="PermissionForm" target="PermissionItem" deleteRule="Deny" db-relationship-path="permissionItems"/>
+	<obj-relationship name="episode" source="PermissionForm" target="Episode" deleteRule="Nullify" db-relationship-path="episode"/>
+	<obj-relationship name="permissionItems" source="PermissionForm" target="PermissionItem" deleteRule="Cascade" db-relationship-path="permissionItems"/>
 	<obj-relationship name="consentItem" source="PermissionItem" target="ConsentItem" deleteRule="Nullify" db-relationship-path="consentItem"/>
 	<obj-relationship name="permissionForm" source="PermissionItem" target="PermissionForm" deleteRule="Nullify" db-relationship-path="permission"/>
 	<obj-relationship name="authority" source="Project" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
