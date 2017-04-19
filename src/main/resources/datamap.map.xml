@@ -55,7 +55,7 @@
 		<db-attribute name="public_key" type="CLOB" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="t_permission_form" schema="public">
-		<db-attribute name="consent_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="consent_form_fk" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="date_time_created" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="episode_fk" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
@@ -63,7 +63,7 @@
 	<db-entity name="t_permission_item" schema="public">
 		<db-attribute name="consent_item_fk" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true"/>
-		<db-attribute name="permission_fk" type="INTEGER" isMandatory="true"/>
+		<db-attribute name="permission_form_fk" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="response" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
 	<db-entity name="t_project" schema="public">
@@ -171,19 +171,19 @@
 		<db-attribute-pair source="id" target="patient_fk"/>
 	</db-relationship>
 	<db-relationship name="consent" source="t_permission_form" target="t_consent_form" toMany="false">
-		<db-attribute-pair source="consent_fk" target="id"/>
+		<db-attribute-pair source="consent_form_fk" target="id"/>
 	</db-relationship>
 	<db-relationship name="episode" source="t_permission_form" target="t_episode" toMany="false">
 		<db-attribute-pair source="episode_fk" target="id"/>
 	</db-relationship>
 	<db-relationship name="permissionItems" source="t_permission_form" target="t_permission_item" toMany="true">
-		<db-attribute-pair source="id" target="permission_fk"/>
+		<db-attribute-pair source="id" target="permission_form_fk"/>
 	</db-relationship>
 	<db-relationship name="consentItem" source="t_permission_item" target="t_consent_item" toMany="false">
 		<db-attribute-pair source="consent_item_fk" target="id"/>
 	</db-relationship>
 	<db-relationship name="permission" source="t_permission_item" target="t_permission_form" toMany="false">
-		<db-attribute-pair source="permission_fk" target="id"/>
+		<db-attribute-pair source="permission_form_fk" target="id"/>
 	</db-relationship>
 	<db-relationship name="authority" source="t_project" target="t_authority" toMany="false">
 		<db-attribute-pair source="authority_fk" target="id"/>
