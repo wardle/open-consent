@@ -203,6 +203,7 @@
 	<obj-relationship name="consentForm" source="ConsentItem" target="ConsentForm" deleteRule="Nullify" db-relationship-path="consent_form"/>
 	<obj-relationship name="authority" source="Endorsement" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
 	<obj-relationship name="patient" source="Endorsement" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
+	<obj-relationship name="permissionForms" source="Episode" target="PermissionForm" deleteRule="Deny" db-relationship-path="permissionForms"/>
 	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
 	<obj-relationship name="endorsements" source="Patient" target="Endorsement" deleteRule="Cascade" db-relationship-path="endorsements"/>
 	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Cascade" db-relationship-path="registrations"/>
@@ -212,6 +213,7 @@
 	<obj-relationship name="consentItem" source="PermissionItem" target="ConsentItem" deleteRule="Nullify" db-relationship-path="consentItem"/>
 	<obj-relationship name="permissionForm" source="PermissionItem" target="PermissionForm" deleteRule="Nullify" db-relationship-path="permission"/>
 	<obj-relationship name="authority" source="Project" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
+	<obj-relationship name="consentForms" source="Project" target="ConsentForm" deleteRule="Cascade" db-relationship-path="consent_forms"/>
 	<obj-relationship name="episodes" source="Project" target="Episode" deleteRule="Deny" db-relationship-path="episodes"/>
 	<obj-relationship name="patient" source="Registration" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 </data-map>
