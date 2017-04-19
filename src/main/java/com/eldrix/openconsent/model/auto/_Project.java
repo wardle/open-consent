@@ -6,6 +6,7 @@ import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.exp.Property;
 
 import com.eldrix.openconsent.model.Authority;
+import com.eldrix.openconsent.model.ConsentForm;
 import com.eldrix.openconsent.model.Episode;
 
 /**
@@ -26,6 +27,7 @@ public abstract class _Project extends CayenneDataObject {
     public static final Property<String> TITLE = Property.create("title", String.class);
     public static final Property<String> UUID = Property.create("uuid", String.class);
     public static final Property<Authority> AUTHORITY = Property.create("authority", Authority.class);
+    public static final Property<List<ConsentForm>> CONSENT_FORMS = Property.create("consentForms", List.class);
     public static final Property<List<Episode>> EPISODES = Property.create("episodes", List.class);
 
     public void setDescription(String description) {
@@ -70,6 +72,18 @@ public abstract class _Project extends CayenneDataObject {
 
     public Authority getAuthority() {
         return (Authority)readProperty("authority");
+    }
+
+
+    public void addToConsentForms(ConsentForm obj) {
+        addToManyTarget("consentForms", obj, true);
+    }
+    public void removeFromConsentForms(ConsentForm obj) {
+        removeToManyTarget("consentForms", obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<ConsentForm> getConsentForms() {
+        return (List<ConsentForm>)readProperty("consentForms");
     }
 
 

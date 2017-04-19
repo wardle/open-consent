@@ -7,13 +7,13 @@ package com.eldrix.openconsent.model;
  * Opt-out consent assumes agreement, but allows withdrawal of that implicit consent.
  */
 public enum ConsentType {
-	EXPLICIT(false),
-	IMPLICIT(true);
-	private final boolean _assumedDefault;
-	ConsentType(boolean assumedDefault) {
+	EXPLICIT(PermissionResponse.DISAGREE),
+	IMPLICIT(PermissionResponse.AGREE);
+	final PermissionResponse _assumedDefault;
+	ConsentType(PermissionResponse assumedDefault) {
 		_assumedDefault = assumedDefault;
 	}
-	public boolean assumedDefault() {
+	public PermissionResponse assumedDefault() {
 		return _assumedDefault;
 	}
 }

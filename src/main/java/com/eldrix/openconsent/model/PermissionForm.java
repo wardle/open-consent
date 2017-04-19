@@ -2,6 +2,7 @@ package com.eldrix.openconsent.model;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.cayenne.validation.SimpleValidationFailure;
@@ -40,5 +41,11 @@ public class PermissionForm extends _PermissionForm {
     	} else {
     		validationResult.addFailure(new SimpleValidationFailure(this, "Missing mandatory consent form."));
     	}
+    }
+    
+    public Optional<PermissionItem> getItemWithBehaviour(String behaviour) {
+    	return getPermissionItems().stream()
+    			.filter(item -> item.getConsentItem().getBehaviour().equalsIgnoreCase(behaviour))
+    			.findFirst();
     }
 }

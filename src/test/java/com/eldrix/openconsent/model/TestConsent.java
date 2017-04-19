@@ -7,11 +7,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDate;
-
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.validation.ValidationResult;
 import org.junit.Test;
+
+import com.eldrix.openconsent.model.TestPatients.ExamplePatient;
 
 public class TestConsent extends _ModelTest {
 
@@ -107,16 +107,16 @@ public class TestConsent extends _ModelTest {
 		context.commitChanges();
 	}
 	
-	
 	@Test
-	public void testPermissions() throws InvalidIdentifierException {
+	public void testPermissionValidation() throws InvalidIdentifierException {
 		ObjectContext context = getRuntime().newContext();
+		// create a basic project and consent form
 		ConsentForm consentForm = createBasicConsentForm(context);
-		context.commitChanges();
-		Episode episode = consentForm.getProject().registerPatientToProject("1111111111", LocalDate.of(1975, 1, 1));
+		Project project = consentForm.getProject();
+		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		PermissionForm permissionForm = context.newObject(PermissionForm.class);
 		permissionForm.setConsentForm(consentForm);
-		permissionForm.setEpisode(episode);
+		permissionForm.setEpisode(episode);		// normally we'd have to find episode from endorsements.
 		ValidationResult validationResult = new ValidationResult();
 		permissionForm.validateForSave(validationResult);
 		assertTrue(validationResult.hasFailures());		// can't create permissions until consent form is finalised
@@ -136,13 +136,57 @@ public class TestConsent extends _ModelTest {
 		
 		validationResult.clear();
 		permissionForm.validateForSave(validationResult);
-		assertFalse(validationResult.hasFailures());
+		assertFalse(validationResult.hasFailures());		// successfully created permissions
+	}
+	
+	
+	@Test
+	public void testOptOut() throws InvalidIdentifierException {
+		ObjectContext context = getRuntime().newContext();
+
+		// the patient registers an account
+		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
+		context.commitChanges();
+
+		// create a basic project and consent form
+		ConsentForm consentForm = createBasicConsentForm(context);
+		consentForm.setStatus(ConsentFormStatus.FINAL);
+		context.commitChanges();
+
+		Project project = consentForm.getProject();
+		Endorsement endorsement = project.getAuthority().endorsePatient(spt.getPatient(), ExamplePatient.nnn, ExamplePatient.dateBirth);
+		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		context.commitChanges();
+
+		// check that the defaults apply for this:
+		assertEquals(PermissionResponse.AGREE, episode.permissionFor("PARTICIPATE"));		// implicit
+		assertEquals(PermissionResponse.DISAGREE, episode.permissionFor("COMMUNICATION"));	// explicit
+		assertEquals(PermissionResponse.DISAGREE, episode.permissionFor("WIBBLE"));	// missing
 		
+		// now patient wishes to record their explicit permissions...
+		Episode e2 = spt.fetchEpisodes().stream().filter(ep -> ep.getProject() == project).findFirst().get();
+		PermissionForm permissionForm = context.newObject(PermissionForm.class);
+		permissionForm.setConsentForm(consentForm);
+		permissionForm.setEpisode(e2);		// normally we'd have to find episode from endorsements.
+		consentForm.getConsentItems().forEach(item -> {
+			PermissionItem perm = context.newObject(PermissionItem.class);
+			perm.setConsentItem(item);
+			perm.setResponse(PermissionResponse.AGREE);		// agree to everything
+			perm.setPermissionForm(permissionForm);
+		});
+		context.commitChanges();
+		
+		// now pretend we are a project that knows nothing except the patient details
+		Episode e3 = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		assertEquals(episode.getObjectId(), e3.getObjectId());
+		assertEquals(PermissionResponse.AGREE, e3.permissionFor("PARTICIPATE"));
+		assertEquals(PermissionResponse.AGREE, e3.permissionFor("COMMUNICATION"));
+				
 		// clean-up
 		context.deleteObjects(
-				episode, 
 				permissionForm,
-				consentForm,
+				episode, 
+				consentForm, spt.getPatient(),
 				consentForm.getProject(), consentForm.getProject().getAuthority()
 				);
 		context.commitChanges();

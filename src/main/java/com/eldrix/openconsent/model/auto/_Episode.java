@@ -1,10 +1,12 @@
 package com.eldrix.openconsent.model.auto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.apache.cayenne.CayenneDataObject;
 import org.apache.cayenne.exp.Property;
 
+import com.eldrix.openconsent.model.PermissionForm;
 import com.eldrix.openconsent.model.Project;
 
 /**
@@ -22,6 +24,7 @@ public abstract class _Episode extends CayenneDataObject {
     public static final Property<LocalDate> DATE_REGISTRATION = Property.create("dateRegistration", LocalDate.class);
     public static final Property<String> PATIENT_AUTHORITY_PSEUDONYM = Property.create("patientAuthorityPseudonym", String.class);
     public static final Property<String> PATIENT_PSEUDONYM = Property.create("patientPseudonym", String.class);
+    public static final Property<List<PermissionForm>> PERMISSION_FORMS = Property.create("permissionForms", List.class);
     public static final Property<Project> PROJECT = Property.create("project", Project.class);
 
     public void setDateRegistration(LocalDate dateRegistration) {
@@ -44,6 +47,18 @@ public abstract class _Episode extends CayenneDataObject {
     public String getPatientPseudonym() {
         return (String)readProperty("patientPseudonym");
     }
+
+    public void addToPermissionForms(PermissionForm obj) {
+        addToManyTarget("permissionForms", obj, true);
+    }
+    public void removeFromPermissionForms(PermissionForm obj) {
+        removeToManyTarget("permissionForms", obj, true);
+    }
+    @SuppressWarnings("unchecked")
+    public List<PermissionForm> getPermissionForms() {
+        return (List<PermissionForm>)readProperty("permissionForms");
+    }
+
 
     public void setProject(Project project) {
         setToOneTarget("project", project, true);

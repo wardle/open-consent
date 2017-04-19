@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
@@ -47,6 +48,14 @@ public class ConsentForm extends _ConsentForm {
 		}
 		super.setStatus(status);
 	}
+	
+	
+
+    public Optional<ConsentItem> getItemWithBehaviour(String behaviour) {
+    	return getConsentItems().stream()
+    			.filter(item -> item.getBehaviour().equalsIgnoreCase(behaviour))
+    			.findFirst();
+    }
 
 	/**
 	 * Return an ordered list of the consent items.
