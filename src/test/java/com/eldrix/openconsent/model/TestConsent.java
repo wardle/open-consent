@@ -163,7 +163,7 @@ public class TestConsent extends _ModelTest {
 		Episode e2 = spt.fetchEpisodes().stream().filter(ep -> ep.getProject() == project).findFirst().get();
 		PermissionForm permissionForm = context.newObject(PermissionForm.class);
 		permissionForm.setConsentForm(consentForm);
-		permissionForm.setEpisode(e2);		// normally we'd have to find episode from endorsements.
+		permissionForm.setEpisode(e2);
 		consentForm.getConsentItems().forEach(item -> {
 			PermissionItem perm = context.newObject(PermissionItem.class);
 			perm.setConsentItem(item);
