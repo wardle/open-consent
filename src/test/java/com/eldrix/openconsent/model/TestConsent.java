@@ -172,14 +172,35 @@ public class TestConsent extends _ModelTest {
 		});
 		
 		// now pretend we are a project that knows nothing except the patient details
+		// do we have permission to access this patient's information?
 		Episode e3 = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
-		assertEquals(episode.getObjectId(), e3.getObjectId());
+		assertEquals(episode.getObjectId(), e3.getObjectId());		// we haven't created a duplicate episode
 		assertEquals(PermissionResponse.AGREE, e3.permissionFor("PARTICIPATE"));
 		assertEquals(PermissionResponse.AGREE, e3.permissionFor("COMMUNICATION"));
-				
+		context.commitChanges();
+		
+		// now patient wants to stop participating in the project
+		// they are shown the epidoses to which they are registered...
+		Episode e4 = spt.fetchEpisodes().stream().filter(ep -> ep.getProject() == project).findFirst().get();
+		// patient decides to withdraw their consent... so let's complete a permission-form.
+		PermissionForm permissionForm2 = context.newObject(PermissionForm.class);
+		permissionForm2.setConsentForm(consentForm);
+		permissionForm2.setEpisode(e4);
+		consentForm.getConsentItems().forEach(item -> {
+			PermissionItem perm = context.newObject(PermissionItem.class);
+			perm.setConsentItem(item);
+			perm.setResponse(PermissionResponse.DISAGREE);		// disagree to everything
+			perm.setPermissionForm(permissionForm2);
+		});
+		Episode e5 = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		assertEquals(PermissionResponse.DISAGREE, e5.permissionFor("PARTICIPATE"));
+		assertEquals(PermissionResponse.DISAGREE, e5.permissionFor("COMMUNICATION"));
+		context.commitChanges();
+		
 		// clean-up
 		context.deleteObjects(
 				permissionForm,
+				permissionForm2,
 				episode, 
 				consentForm, spt.getPatient(),
 				consentForm.getProject(), consentForm.getProject().getAuthority()
