@@ -26,7 +26,7 @@ public class Episode extends _Episode {
      * @return
      */
     protected Optional<PermissionResponse> explicitPermissionFor(String behaviour) {
-    	Ordering ordering = PermissionForm.DATE_TIME_CREATED.descInsensitive();
+    	Ordering ordering = PermissionForm.DATE_TIME_CREATED.desc();
     	List<PermissionForm> permissions = ordering.orderedList(getPermissionForms());
     	for (PermissionForm pf : permissions) {
     		Optional<PermissionItem> pi = pf.getItemWithBehaviour(behaviour);
