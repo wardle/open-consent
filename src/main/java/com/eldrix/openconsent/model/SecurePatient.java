@@ -16,6 +16,7 @@ import javax.crypto.NoSuchPaddingException;
 import org.apache.cayenne.Cayenne;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
+import org.apache.cayenne.exp.Property;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.shiro.authc.credential.DefaultPasswordService;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -49,6 +50,11 @@ public final class SecurePatient {
 	private static AesCipherService _cipherService = new AesCipherService();	// thread-safe
 	private RsaService _rsaService;			// not thread-safe, yet.
 
+    public static final Property<Patient> PATIENT = Property.create("patient", Patient.class);
+    public static final Property<List<Episode>> EPISODES = Property.create("episodes", List.class);
+    public static final Property<String> NAME = Property.create("name", String.class);
+    public static final Property<String> EMAIL = Property.create("email", String.class);
+   
 	@LrId
 	public int getId() {
 		return Cayenne.intPKForObject(getPatient());
@@ -252,7 +258,7 @@ public final class SecurePatient {
 	 * @return
 	 */
 	@LrRelationship
-	public List<Episode> fetchEpisodes() {
+	public List<Episode> getEpisodes() {
 		Set<Episode> episodes = new LinkedHashSet<>();
 		episodes.addAll(fetchEpisodesFromRegistrations());
 		episodes.addAll(fetchEpisodesFromEndorsements());

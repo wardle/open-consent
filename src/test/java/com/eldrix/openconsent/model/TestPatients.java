@@ -105,12 +105,12 @@ public class TestPatients extends _ModelTest {
 		// validate (endorse) this account linking it to an authority.
 		Patient pt = SecurePatient.fetchPatient(context, ExamplePatient.email);
 		Endorsement endorsement = authority.endorsePatient(pt, ExamplePatient.nnn, ExamplePatient.dateBirth);
-		assertEquals(0, spt.fetchEpisodes().size());		// confirm that patient has no episodes, yet
+		assertEquals(0, spt.getEpisodes().size());		// confirm that patient has no episodes, yet
 		//
 		// now our multiple sclerosis service registers the patient
 		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		context.commitChanges();
-		assertEquals(1, spt.fetchEpisodes().size());		// patient should now have one episode.
+		assertEquals(1, spt.getEpisodes().size());		// patient should now have one episode.
 
 		// project sends a message to the patient - they know email...
 		final String welcomeMessage = "Welcome to our service";
@@ -204,7 +204,7 @@ public class TestPatients extends _ModelTest {
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
 		context.commitChanges();
 
-		assertEquals(0, spt.fetchEpisodes().size());
+		assertEquals(0, spt.getEpisodes().size());
 
 		// project, by default, is opt-out and so assumes inclusion. Tickets generated from this episode will give access to data
 		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);

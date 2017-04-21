@@ -160,7 +160,7 @@ public class TestConsent extends _ModelTest {
 		assertEquals(PermissionResponse.DISAGREE, episode.permissionFor("WIBBLE"));	// missing
 		
 		// now patient wishes to record their explicit permissions...
-		Episode e2 = spt.fetchEpisodes().stream().filter(ep -> ep.getProject() == project).findFirst().get();
+		Episode e2 = spt.getEpisodes().stream().filter(ep -> ep.getProject() == project).findFirst().get();
 		PermissionForm permissionForm = context.newObject(PermissionForm.class);
 		permissionForm.setConsentForm(consentForm);
 		permissionForm.setEpisode(e2);
@@ -181,7 +181,7 @@ public class TestConsent extends _ModelTest {
 		
 		// now patient wants to stop participating in the project
 		// they are shown the epidoses to which they are registered...
-		Episode e4 = spt.fetchEpisodes().stream().filter(ep -> ep.getProject() == project).findFirst().get();
+		Episode e4 = spt.getEpisodes().stream().filter(ep -> ep.getProject() == project).findFirst().get();
 		// patient decides to withdraw their consent... so let's complete a permission-form.
 		PermissionForm permissionForm2 = context.newObject(PermissionForm.class);
 		permissionForm2.setConsentForm(consentForm);
