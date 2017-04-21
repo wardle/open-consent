@@ -14,8 +14,11 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.cayenne.ObjectContext;
 
+import com.eldrix.openconsent.core.IncludePropertiesListener;
 import com.eldrix.openconsent.core.SingleObjectListener;
+import com.eldrix.openconsent.model.Episode;
 import com.eldrix.openconsent.model.Patient;
+import com.eldrix.openconsent.model.Project;
 import com.eldrix.openconsent.model.SecurePatient;
 import com.nhl.link.rest.DataResponse;
 import com.nhl.link.rest.LinkRest;
@@ -34,7 +37,7 @@ public class PatientResource {
 	@Context
 	private Configuration config;
 
-	public static ConstraintsBuilder<Patient> constraints() {
+	public static ConstraintsBuilder<Patient> patientConstraints() {
 		return Constraint.idOnly(Patient.class);
 	}
 
@@ -81,7 +84,7 @@ public class PatientResource {
 	public DataResponse<Patient> getOne(@PathParam("patientId") int id, @Context UriInfo uriInfo) {
 		return LinkRest.select(Patient.class, config)
 				.byId(id).uri(uriInfo)
-				.constraint(constraints())
+				.constraint(patientConstraints())
 				.getOne();
 	}
 
@@ -103,7 +106,25 @@ public class PatientResource {
 		ICayennePersister cayenne = LinkRestRuntime.service(ICayennePersister.class, config);
 		ObjectContext context = cayenne.newContext();
 		SecurePatient spt = SecurePatient.performLogin(context, email, password);
-		Object listener = new SingleObjectListener<SecurePatient>(spt);
-		return LinkRest.select(SecurePatient.class, config).listener(listener).uri(uriInfo).getOne(); 
+		if (spt == null) {
+			throw new LinkRestException(Status.FORBIDDEN, "Invalid email or password.");
+		}
+		return LinkRest.select(SecurePatient.class, config)
+				.listener(new SingleObjectListener<SecurePatient>(spt))
+				.listener(new IncludePropertiesListener<SecurePatient>(
+						SecurePatient.EPISODES, 
+						SecurePatient.EPISODES.dot(Episode.PROJECT),
+						SecurePatient.EPISODES.dot(Episode.PROJECT.dot(Project.AUTHORITY))))
+				.uri(uriInfo)
+				.constraint(securePatientConstraints())
+				.getOne(); 
 	}
+	
+	public Constraint<SecurePatient> securePatientConstraints() {
+		return Constraint.idAndAttributes(SecurePatient.class)
+				.path(SecurePatient.PATIENT, patientConstraints())
+				.toManyPath(SecurePatient.EPISODES, EpisodeSubResource.constraints());
+	}
+	
+	
 }

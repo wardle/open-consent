@@ -29,6 +29,7 @@ import com.nhl.link.rest.DataResponse;
 import com.nhl.link.rest.LinkRest;
 import com.nhl.link.rest.LinkRestException;
 import com.nhl.link.rest.constraints.Constraint;
+import com.nhl.link.rest.constraints.ConstraintsBuilder;
 
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -42,10 +43,11 @@ public class ProjectSubResource {
 		this.authorityId = authorityId;
 	}
 
-	public Constraint<Project> constraints() {
-		return Constraint.idAndAttributes(Project.class).excludeProperty(Project.UUID);
+	public static ConstraintsBuilder<Project> constraints() {
+		return Constraint.idAndAttributes(Project.class)
+				.excludeProperty(Project.UUID)
+				.path(Project.AUTHORITY, AuthorityResource.constraints());		
 	}
-
 
 	@POST
 	public DataResponse<Project> create(String data) {
@@ -98,7 +100,7 @@ public class ProjectSubResource {
 			episode.getObjectContext().commitChanges();
 			return LinkRest.service(config)
 					.select(Episode.class)
-					.constraint(episodeConstraint())
+					.constraint(EpisodeSubResource.constraints())
 					.uri(uriInfo)
 					.listener(new SingleObjectListener<Episode>(episode))
 					.get();
@@ -154,17 +156,22 @@ public class ProjectSubResource {
 			throw new LinkRestException(Status.BAD_REQUEST, e.getMessage());
 		}
 	}
-
-	public static Constraint<Episode> episodeConstraint() {
-		return Constraint.idOnly(Episode.class).
-				attributes(Episode.DATE_REGISTRATION, Episode.PATIENT_PSEUDONYM);
-	}
 	
 	public static Constraint<Endorsement> endorsementConstraint() {
 		return Constraint.idOnly(Endorsement.class)
 				.attributes(Endorsement.AUTHORITY, Endorsement.PATIENT)
-				.path(Endorsement.PATIENT, PatientResource.constraints())
+				.path(Endorsement.PATIENT, PatientResource.patientConstraints())
 				.path(Endorsement.AUTHORITY, AuthorityResource.constraints());
-
 	}	
+	
+	@Path("{projectId}/consentForms")
+	public ConsentFormSubResource consentForms(@PathParam("projectId") int projectId) {
+		return new ConsentFormSubResource(config, projectId);
+	}
+	
+	@Path("{projectId}/episodes")
+	public EpisodeSubResource episodes(@PathParam("projectId") int projectId) {
+		return new EpisodeSubResource(config, projectId);
+	}
+
 }
