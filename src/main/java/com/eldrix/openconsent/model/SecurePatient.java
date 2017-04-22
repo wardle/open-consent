@@ -55,6 +55,9 @@ public final class SecurePatient {
     public static final Property<String> NAME = Property.create("name", String.class);
     public static final Property<String> EMAIL = Property.create("email", String.class);
    
+	public final static int MINIMUM_PASSWORD_LENGTH = 4;
+	public final static int MAXIMUM_PASSWORD_LENGTH = 255;
+    
 	@LrId
 	public int getId() {
 		return Cayenne.intPKForObject(getPatient());
@@ -150,6 +153,17 @@ public final class SecurePatient {
 
 	public boolean passwordMatches(String password) {
 		return _passwordService.passwordsMatch(password, getPatient().getHashedPassword());
+	}
+	
+	/**
+	 * Does this password meet our minimum requirements?
+	 * @param password
+	 * @return
+	 */
+	public static boolean isAcceptablePassword(String password) {
+		return password != null && 
+				password.length() >= MINIMUM_PASSWORD_LENGTH &&
+				password.length() < MAXIMUM_PASSWORD_LENGTH;
 	}
 
 	/**

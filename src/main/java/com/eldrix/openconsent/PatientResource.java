@@ -32,7 +32,6 @@ import com.nhl.link.rest.runtime.cayenne.ICayennePersister;
 @Path("patient")
 @Produces(MediaType.APPLICATION_JSON)
 public class PatientResource {
-	private final static int MINIMUM_PASSWORD_LENGTH = 4;
 
 	@Context
 	private Configuration config;
@@ -65,7 +64,7 @@ public class PatientResource {
 		if (name == null || name.length() == 0) {
 			throw new LinkRestException(Status.BAD_REQUEST, "Invalid 'name'");
 		}
-		if (password1 == null || password1.length() < MINIMUM_PASSWORD_LENGTH) {
+		if (SecurePatient.isAcceptablePassword(password1) == false) {
 			throw new LinkRestException(Status.BAD_REQUEST, "Invalid 'password'");
 		}
 		if (password1.equals(password2) == false) {
@@ -103,28 +102,32 @@ public class PatientResource {
 	public DataResponse<SecurePatient> login(@QueryParam("email") String email,
 			@QueryParam("password") String password,
 			@Context UriInfo uriInfo) {
+		SecurePatient spt = null;
 		ICayennePersister cayenne = LinkRestRuntime.service(ICayennePersister.class, config);
 		ObjectContext context = cayenne.newContext();
-		SecurePatient spt = SecurePatient.performLogin(context, email, password);
-		if (spt == null) {
-			throw new LinkRestException(Status.FORBIDDEN, "Invalid email or password.");
+		if (password != null && SecurePatient.MAXIMUM_PASSWORD_LENGTH > password.length()) {
+			spt = SecurePatient.performLogin(context, email, password);
+			if (spt != null) {
+				return LinkRest.select(SecurePatient.class, config)
+						.listener(new SingleObjectListener<SecurePatient>(spt))
+						.listener(new IncludePropertiesListener<SecurePatient>(
+								SecurePatient.EPISODES, 
+								SecurePatient.EPISODES.dot(Episode.PROJECT),
+								SecurePatient.EPISODES.dot(Episode.PROJECT.dot(Project.AUTHORITY))))
+						.uri(uriInfo)
+						.constraint(securePatientConstraints())
+						.getOne();
+			}
 		}
-		return LinkRest.select(SecurePatient.class, config)
-				.listener(new SingleObjectListener<SecurePatient>(spt))
-				.listener(new IncludePropertiesListener<SecurePatient>(
-						SecurePatient.EPISODES, 
-						SecurePatient.EPISODES.dot(Episode.PROJECT),
-						SecurePatient.EPISODES.dot(Episode.PROJECT.dot(Project.AUTHORITY))))
-				.uri(uriInfo)
-				.constraint(securePatientConstraints())
-				.getOne(); 
+		throw new LinkRestException(Status.FORBIDDEN, "Invalid email or password.");
+
 	}
-	
+
 	public Constraint<SecurePatient> securePatientConstraints() {
 		return Constraint.idAndAttributes(SecurePatient.class)
 				.path(SecurePatient.PATIENT, patientConstraints())
 				.toManyPath(SecurePatient.EPISODES, EpisodeSubResource.constraints());
 	}
-	
-	
+
+
 }
