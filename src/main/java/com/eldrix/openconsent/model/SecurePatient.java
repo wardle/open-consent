@@ -3,12 +3,8 @@ package com.eldrix.openconsent.model;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.crypto.NoSuchPaddingException;
@@ -220,51 +216,17 @@ public final class SecurePatient {
 	}
 
 	/**
-	 * Create a registration for the specified episode.
-	 * @param episode
-	 * @return
-	 */
-	public Registration createRegistrationForEpisode(Episode episode, String identifier, LocalDate dateBirth) {
-		String pseudonym1 = episode.getPatientPseudonym();
-		String pseudonym2 = episode.getProject().calculatePseudonym(identifier, dateBirth);
-		if (pseudonym1.equals(pseudonym2) == false) {
-			throw new IllegalArgumentException("Episode pseudonym does not match patient's details");
-		}
-		String encrypted = _encrypt(pseudonym1);
-		Registration reg = episode.getObjectContext().newObject(Registration.class);
-		reg.setPatient(getPatient());
-		reg.setEncryptedPseudonym(encrypted);
-		return reg;
-	}
-
-	/**
-	 * Return a list of episodes for this patient by decrypting the episode
-	 * project-scoped pseudonymous identifiers from the registrations.
-	 * 
-	 * @return  a list of opted-in episodes for this patient.
-	 */
-	public List<Episode> fetchEpisodesFromRegistrations() {
-		List<String> ids = getPatient().getRegistrations().stream()
-				.map(Registration::getEncryptedPseudonym)
-				.map(eid -> _decrypt(eid)).collect(Collectors.toList());
-		Expression qual = Episode.PATIENT_PSEUDONYM.in(ids);
-		return ObjectSelect.query(Episode.class, qual).select(getPatient().getObjectContext());
-	}
-
-	/**
 	 * Returns a list of episodes for this patient by using endorsements to provide authority-scoped pseudonyms. 
 	 * 
 	 * @return a list of opt-out episodes that exist for this patient.
 	 */
-	public List<Episode> fetchEpisodesFromEndorsements() {
+	public Expression qualifierForEpisodes() {
 		List<String> authorityPseudonyms = getPatient().getEndorsements().stream()
 				.map(e -> {
 					return decryptUsingPrivateKey(e.getEncryptedAuthorityPseudonym());
 				})
 				.collect(Collectors.toList());
-		Expression qual = Episode.PATIENT_AUTHORITY_PSEUDONYM.in(authorityPseudonyms);
-		return ObjectSelect.query(Episode.class, qual).select(getPatient().getObjectContext());
-
+		return Episode.PATIENT_AUTHORITY_PSEUDONYM.in(authorityPseudonyms);
 	}
 
 	/**
@@ -273,10 +235,7 @@ public final class SecurePatient {
 	 */
 	@LrRelationship
 	public List<Episode> getEpisodes() {
-		Set<Episode> episodes = new LinkedHashSet<>();
-		episodes.addAll(fetchEpisodesFromRegistrations());
-		episodes.addAll(fetchEpisodesFromEndorsements());
-		return new ArrayList<Episode>(episodes);
+		return ObjectSelect.query(Episode.class, qualifierForEpisodes()).select(getPatient().getObjectContext());
 	}
 
 	/**

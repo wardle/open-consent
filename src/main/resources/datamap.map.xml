@@ -75,11 +75,6 @@
 		<db-attribute name="title" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="uuid" type="VARCHAR" isMandatory="true" length="64"/>
 	</db-entity>
-	<db-entity name="t_registration" schema="public">
-		<db-attribute name="encrypted_pseudonym" type="LONGVARCHAR" isMandatory="true"/>
-		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isGenerated="true" isMandatory="true" length="10"/>
-		<db-attribute name="patient_fk" type="INTEGER" isMandatory="true"/>
-	</db-entity>
 	<obj-entity name="Authority" className="com.eldrix.openconsent.model.Authority" lock-type="optimistic" dbEntityName="t_authority">
 		<obj-attribute name="logic" type="com.eldrix.openconsent.model.AuthorityLogic" db-attribute-path="logic"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
@@ -137,9 +132,6 @@
 		<post-add method-name="onPostAdd"/>
 		<post-load method-name="onPostLoad"/>
 	</obj-entity>
-	<obj-entity name="Registration" className="com.eldrix.openconsent.model.Registration" lock-type="optimistic" dbEntityName="t_registration">
-		<obj-attribute name="encryptedPseudonym" type="java.lang.String" db-attribute-path="encrypted_pseudonym"/>
-	</obj-entity>
 	<db-relationship name="projects" source="t_authority" target="t_project" toMany="true">
 		<db-attribute-pair source="id" target="authority_fk"/>
 	</db-relationship>
@@ -167,9 +159,6 @@
 	<db-relationship name="endorsements" source="t_patient" target="t_endorsement" toMany="true">
 		<db-attribute-pair source="id" target="patient_fk"/>
 	</db-relationship>
-	<db-relationship name="registrations" source="t_patient" target="t_registration" toMany="true">
-		<db-attribute-pair source="id" target="patient_fk"/>
-	</db-relationship>
 	<db-relationship name="consent" source="t_permission_form" target="t_consent_form" toMany="false">
 		<db-attribute-pair source="consent_form_fk" target="id"/>
 	</db-relationship>
@@ -194,9 +183,6 @@
 	<db-relationship name="episodes" source="t_project" target="t_episode" toMany="true">
 		<db-attribute-pair source="id" target="project_fk"/>
 	</db-relationship>
-	<db-relationship name="patient" source="t_registration" target="t_patient" toMany="false">
-		<db-attribute-pair source="patient_fk" target="id"/>
-	</db-relationship>
 	<obj-relationship name="projects" source="Authority" target="Project" deleteRule="Deny" db-relationship-path="projects"/>
 	<obj-relationship name="consentItems" source="ConsentForm" target="ConsentItem" deleteRule="Cascade" db-relationship-path="items"/>
 	<obj-relationship name="project" source="ConsentForm" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
@@ -206,7 +192,6 @@
 	<obj-relationship name="permissionForms" source="Episode" target="PermissionForm" deleteRule="Deny" db-relationship-path="permissionForms"/>
 	<obj-relationship name="project" source="Episode" target="Project" deleteRule="Nullify" db-relationship-path="project"/>
 	<obj-relationship name="endorsements" source="Patient" target="Endorsement" deleteRule="Cascade" db-relationship-path="endorsements"/>
-	<obj-relationship name="registrations" source="Patient" target="Registration" deleteRule="Cascade" db-relationship-path="registrations"/>
 	<obj-relationship name="consentForm" source="PermissionForm" target="ConsentForm" deleteRule="Nullify" db-relationship-path="consent"/>
 	<obj-relationship name="episode" source="PermissionForm" target="Episode" deleteRule="Nullify" db-relationship-path="episode"/>
 	<obj-relationship name="permissionItems" source="PermissionForm" target="PermissionItem" deleteRule="Cascade" db-relationship-path="permissionItems"/>
@@ -215,5 +200,4 @@
 	<obj-relationship name="authority" source="Project" target="Authority" deleteRule="Nullify" db-relationship-path="authority"/>
 	<obj-relationship name="consentForms" source="Project" target="ConsentForm" deleteRule="Cascade" db-relationship-path="consent_forms"/>
 	<obj-relationship name="episodes" source="Project" target="Episode" deleteRule="Deny" db-relationship-path="episodes"/>
-	<obj-relationship name="patient" source="Registration" target="Patient" deleteRule="Nullify" db-relationship-path="patient"/>
 </data-map>

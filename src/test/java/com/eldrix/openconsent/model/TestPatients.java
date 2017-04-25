@@ -133,7 +133,6 @@ public class TestPatients extends _ModelTest {
 	 * Test simple registration.
 	 * Here a patient creates an account and manually registers to opt-in to a project.
 	 * 
-	 * Opt-in is quite straightforward, as consent is not permitted without a specific registration.
 	 * @throws InvalidIdentifierException 
 	 */
 	@Test
@@ -150,31 +149,17 @@ public class TestPatients extends _ModelTest {
 		context.commitChanges();
 
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
+		authority.endorsePatient(spt.getPatient(), ExamplePatient.nnn, ExamplePatient.dateBirth);
 
 		// test project registration for a patient. Here, the service knows the NNN and date of birth.
 		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
-
-		// and now link episode to a patient registration
-		Registration registration = spt.createRegistrationForEpisode(episode, ExamplePatient.nnn, ExamplePatient.dateBirth);
-		assertNotEquals(registration.getEncryptedPseudonym(), episode.getPatientPseudonym());
 		context.commitChanges();
 
 		// and now, can we find this registration when we are a patient?
-		assertTrue(spt.fetchEpisodesFromRegistrations().stream().anyMatch(e -> e.getPatientPseudonym() == episode.getPatientPseudonym()));
-
-		// check that can't register when using incorrect data
-		try {
-			spt.createRegistrationForEpisode(episode, "222222222", LocalDate.of(1975, 1, 1));
-			assertTrue(false);			
-		} catch (IllegalArgumentException e) {
-			assertTrue(true);
-		}
-
-
+		assertTrue(spt.getEpisodes().stream().anyMatch(e -> e.getPatientPseudonym() == episode.getPatientPseudonym()));
 
 		// and now clean-up
 		context.deleteObject(spt.getPatient());
-		context.deleteObject(registration);
 		context.deleteObject(episode);
 		context.deleteObject(project);	
 		context.deleteObject(authority);
@@ -215,11 +200,8 @@ public class TestPatients extends _ModelTest {
 		Endorsement endorsement = authority.endorsePatient(spt.getPatient(), ExamplePatient.nnn, ExamplePatient.dateBirth);
 
 		// now, can the patient find his/her episode?
-		// it won't be in the list of explicit episodes as this is an opt-out project.
-		assertFalse(spt.fetchEpisodesFromRegistrations().stream().anyMatch(e -> e.equals(episode)));
-
-		// so we use the endorsements to find the pseudonyms to match on episodes.
-		List<Episode> episodes = spt.fetchEpisodesFromEndorsements();
+		// we use the endorsements to find the pseudonyms to match on episodes.
+		List<Episode> episodes = spt.getEpisodes();
 		assertEquals(1, episodes.size());
 		assertEquals(episodes.get(0), episode);	// confirm that it is the episode we created
 

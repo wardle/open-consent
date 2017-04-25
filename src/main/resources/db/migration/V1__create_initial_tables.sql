@@ -6,8 +6,6 @@ CREATE TABLE t_project (description text NULL, id SERIAL PRIMARY KEY, title VARC
 
 CREATE TABLE t_episode (id serial primary key, date_registration date not null, patient_pseudonym varchar(255) not null, patient_authority_pseudonym varchar(255) not null, project_fk int not null);
 
-CREATE TABLE t_registration (id serial primary key, encrypted_pseudonym text NOT NULL, patient_fk INTEGER, unique(encrypted_pseudonym, patient_fk));
-
 CREATE TABLE t_endorsement (authority_fk integer NOT NULL, encrypted_authority_pseudonym varchar(255) NOT NULL, id serial PRIMARY KEY, patient_fk integer NOT NULL);
 
 CREATE TABLE t_consent_form (date_time_created TIMESTAMP NOT NULL, date_time_finalised TIMESTAMP NULL, id SERIAL PRIMARY KEY, information text NULL, project_fk INTEGER NOT NULL, status VARCHAR(64) NOT NULL, title text NOT NULL, version_string VARCHAR(255) NOT NULL);
@@ -19,7 +17,6 @@ CREATE TABLE t_permission_form (consent_form_fk INTEGER NOT NULL, date_time_crea
 CREATE TABLE t_permission_item (consent_item_fk INTEGER NOT NULL, id SERIAL NOT NULL, permission_form_fk INTEGER NOT NULL, response VARCHAR(64) NOT NULL);
 
 ALTER TABLE t_episode ADD  FOREIGN KEY(project_fk) REFERENCES t_project(id);
-ALTER TABLE t_registration ADD FOREIGN KEY (patient_fk) REFERENCES t_patient (id);
 ALTER TABLE t_project ADD FOREIGN KEY (authority_fk) REFERENCES t_authority (id);
 ALTER TABLE t_endorsement ADD FOREIGN KEY (authority_fk) REFERENCES t_authority (id);
 ALTER TABLE t_endorsement ADD FOREIGN KEY (patient_fk) REFERENCES t_patient (id);
