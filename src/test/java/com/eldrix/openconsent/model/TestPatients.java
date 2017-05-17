@@ -96,9 +96,8 @@ public class TestPatients extends _ModelTest {
 		Authority authority = context.newObject(Authority.class);
 		authority.setName("NHS");
 		authority.setLogic(AuthorityLogic.UK_NHS);
-		Project project = context.newObject(Project.class);
-		project.setTitle("Multiple sclerosis service");
-		project.setAuthority(authority);
+		Project project = authority.createProject("MS_SERVICE", "Multiple sclerosis service");
+
 		// a patient registers their account
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
 		context.commitChanges();
@@ -108,7 +107,7 @@ public class TestPatients extends _ModelTest {
 		assertEquals(0, spt.getEpisodes().size());		// confirm that patient has no episodes, yet
 		//
 		// now our multiple sclerosis service registers the patient
-		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		Episode episode = project.getSecureProject().get().registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		context.commitChanges();
 		assertEquals(1, spt.getEpisodes().size());		// patient should now have one episode.
 
@@ -143,16 +142,15 @@ public class TestPatients extends _ModelTest {
 		Authority authority = context.newObject(Authority.class);
 		authority.setName("NHS");
 		authority.setLogic(AuthorityLogic.UK_NHS);
-		Project project = context.newObject(Project.class);
-		project.setTitle("A simple test project");
-		project.setAuthority(authority);
+		Project project = authority.createProject("TEST", "A simple test project.");
+		SecureProject sp = project.getSecureProject().get();
 		context.commitChanges();
 
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
 		authority.endorsePatient(spt.getPatient(), ExamplePatient.nnn, ExamplePatient.dateBirth);
 
 		// test project registration for a patient. Here, the service knows the NNN and date of birth.
-		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		Episode episode = sp.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		context.commitChanges();
 
 		// and now, can we find this registration when we are a patient?
@@ -180,9 +178,7 @@ public class TestPatients extends _ModelTest {
 		Authority authority = context.newObject(Authority.class);
 		authority.setName("NHS");
 		authority.setLogic(AuthorityLogic.UK_NHS);
-		Project project = context.newObject(Project.class);
-		project.setTitle("Methotrexate agent");		// a pretend intelligent agent that will monitor bloods for us
-		project.setAuthority(authority);
+		Project project = authority.createProject("MTXAGENT", "Methotrexate agent");	// a pretend intelligent agent that will monitor bloods for us
 		context.commitChanges();
 
 		// a patient registers their account
@@ -192,7 +188,7 @@ public class TestPatients extends _ModelTest {
 		assertEquals(0, spt.getEpisodes().size());
 
 		// project, by default, is opt-out and so assumes inclusion. Tickets generated from this episode will give access to data
-		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		Episode episode = project.getSecureProject().get().registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 
 		context.commitChanges();
 

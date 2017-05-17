@@ -83,5 +83,13 @@ public class Authority extends _Authority {
 		endorsement.setAuthority(this);
 		return endorsement;
 	}
+	
+	public Project createProject(String name, String title) {
+		Project p = getObjectContext().newObject(Project.class);
+		p.setAuthority(this);
+		p.setName(name);
+		p.setTitle(title);
+		return p;
+	}
 
 }

@@ -21,14 +21,22 @@ public abstract class _Project extends CayenneDataObject {
 
     public static final String ID_PK_COLUMN = "id";
 
+    public static final Property<String> ACCESS_KEY_DIGEST = Property.create("accessKeyDigest", String.class);
     public static final Property<String> DESCRIPTION = Property.create("description", String.class);
     public static final Property<Boolean> MESSAGING = Property.create("messaging", Boolean.class);
+    public static final Property<String> NAME = Property.create("name", String.class);
     public static final Property<String> PUBLIC_KEY = Property.create("publicKey", String.class);
     public static final Property<String> TITLE = Property.create("title", String.class);
-    public static final Property<String> UUID = Property.create("uuid", String.class);
     public static final Property<Authority> AUTHORITY = Property.create("authority", Authority.class);
     public static final Property<List<ConsentForm>> CONSENT_FORMS = Property.create("consentForms", List.class);
     public static final Property<List<Episode>> EPISODES = Property.create("episodes", List.class);
+
+    public void setAccessKeyDigest(String accessKeyDigest) {
+        writeProperty("accessKeyDigest", accessKeyDigest);
+    }
+    public String getAccessKeyDigest() {
+        return (String)readProperty("accessKeyDigest");
+    }
 
     public void setDescription(String description) {
         writeProperty("description", description);
@@ -45,6 +53,13 @@ public abstract class _Project extends CayenneDataObject {
         return (value != null) ? value.booleanValue() : false;
     }
 
+    public void setName(String name) {
+        writeProperty("name", name);
+    }
+    public String getName() {
+        return (String)readProperty("name");
+    }
+
     public void setPublicKey(String publicKey) {
         writeProperty("publicKey", publicKey);
     }
@@ -57,13 +72,6 @@ public abstract class _Project extends CayenneDataObject {
     }
     public String getTitle() {
         return (String)readProperty("title");
-    }
-
-    public void setUuid(String uuid) {
-        writeProperty("uuid", uuid);
-    }
-    public String getUuid() {
-        return (String)readProperty("uuid");
     }
 
     public void setAuthority(Authority authority) {
@@ -100,7 +108,5 @@ public abstract class _Project extends CayenneDataObject {
 
 
     protected abstract void onPostAdd();
-
-    protected abstract void onPostLoad();
 
 }

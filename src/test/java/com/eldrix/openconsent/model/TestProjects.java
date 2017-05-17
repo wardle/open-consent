@@ -21,12 +21,15 @@ public class TestProjects extends _ModelTest {
 	@Test
 	public void testProjects() {
 		ObjectContext context = getRuntime().newContext();
-		Project p1 = context.newObject(Project.class);
-		Project p2 = context.newObject(Project.class);
-		p1.setTitle("Test project");
-		p1.setDescription("Simple test project");
-		String pseudonym1 = p1.calculatePseudonym("1111111111", LocalDate.of(1975, 01, 01));
-		String pseudonym2 = p2.calculatePseudonym("1111111111", LocalDate.of(1975, 01, 01));
+		Authority authority = context.newObject(Authority.class);
+		Project p1 = authority.createProject("P1","P1");
+		Project p2 = authority.createProject("P2","P2");
+		SecureProject sp1 = p1.getSecureProject().get();
+		SecureProject sp2 = p2.getSecureProject().get();
+		sp1.setTitle("Test project");
+		sp1.setDescription("Simple test project");
+		String pseudonym1 = sp1.calculatePseudonym("1111111111", LocalDate.of(1975, 01, 01));
+		String pseudonym2 = sp2.calculatePseudonym("1111111111", LocalDate.of(1975, 01, 01));
 		assertEquals(64, pseudonym1.length());
 		assertNotEquals(pseudonym1, pseudonym2); 
 	}
@@ -37,9 +40,7 @@ public class TestProjects extends _ModelTest {
 		Authority authority = context.newObject(Authority.class);
 		authority.setName("NHS");
 		authority.setLogic(AuthorityLogic.UK_NHS);
-		Project p1 = context.newObject(Project.class);
-		p1.setTitle("Project title");
-		p1.setAuthority(authority);
+		Project p1 = authority.createProject("TEST", "Test project");
 		ValidationResult validation = new ValidationResult();
 		p1.validateForSave(validation);
 		assertFalse(validation.hasFailures());

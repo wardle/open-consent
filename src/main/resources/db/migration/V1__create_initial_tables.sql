@@ -2,7 +2,7 @@ CREATE TABLE t_patient (encrypted_email text NOT NULL, encrypted_encryption_key 
 
 CREATE TABLE t_authority (id SERIAL PRIMARY KEY, logic VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL UNIQUE, uuid VARCHAR(64) NOT NULL);
 
-CREATE TABLE t_project (description text NULL, id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL UNIQUE, uuid VARCHAR(64) NOT NULL, authority_fk INTEGER NOT NULL, public_key text NULL, messaging BOOLEAN NOT NULL);
+CREATE TABLE t_project (description text NULL, id SERIAL PRIMARY KEY, title VARCHAR(255) NOT NULL UNIQUE, name VARCHAR(64) NOT NULL UNIQUE, access_key_digest VARCHAR(255) NOT NULL, authority_fk INTEGER NOT NULL, public_key text NULL, messaging BOOLEAN NOT NULL);
 
 CREATE TABLE t_episode (id serial primary key, date_registration date not null, patient_pseudonym varchar(255) not null, patient_authority_pseudonym varchar(255) not null, project_fk int not null);
 

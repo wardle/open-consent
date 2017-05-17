@@ -25,6 +25,7 @@ import com.eldrix.openconsent.model.InvalidIdentifierException;
 import com.eldrix.openconsent.model.Patient;
 import com.eldrix.openconsent.model.Project;
 import com.eldrix.openconsent.model.SecurePatient;
+import com.eldrix.openconsent.model.SecureProject;
 import com.nhl.link.rest.DataResponse;
 import com.nhl.link.rest.LinkRest;
 import com.nhl.link.rest.LinkRestException;
@@ -45,7 +46,7 @@ public class ProjectSubResource {
 
 	public static ConstraintsBuilder<Project> constraints() {
 		return Constraint.idAndAttributes(Project.class)
-				.excludeProperty(Project.UUID)
+				.excludeProperty(Project.ACCESS_KEY_DIGEST)
 				.path(Project.AUTHORITY, AuthorityResource.constraints());		
 	}
 
@@ -86,6 +87,7 @@ public class ProjectSubResource {
 	@PUT
 	@Path("{projectId}/register") 
 	public DataResponse<Episode> registerPatient(@PathParam("projectId") int id,
+			@QueryParam("accessKey") String accessKey,
 			@QueryParam("identifier") String identifier,
 			@QueryParam("dateBirth") String dateBirth,
 			@Context UriInfo uriInfo) {
@@ -94,9 +96,13 @@ public class ProjectSubResource {
 			throw new LinkRestException(Status.NOT_FOUND, "No project found with id: "+id);
 		}
 		Project project = projects.get(0);
+		SecureProject sProject = SecureProject.performLogin(project, accessKey);
+		if (sProject == null) {
+			throw new LinkRestException(Status.UNAUTHORIZED, "Invalid access key");
+		}
 		try {
 			LocalDate dateBirth2 = LocalDate.parse(dateBirth);
-			Episode episode = project.registerPatientToProject(identifier, dateBirth2);
+			Episode episode = sProject.registerPatientToProject(identifier, dateBirth2);
 			episode.getObjectContext().commitChanges();
 			return LinkRest.service(config)
 					.select(Episode.class)

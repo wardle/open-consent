@@ -112,8 +112,7 @@ public class TestConsent extends _ModelTest {
 		ObjectContext context = getRuntime().newContext();
 		// create a basic project and consent form
 		ConsentForm consentForm = createBasicConsentForm(context);
-		Project project = consentForm.getProject();
-		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		Episode episode = consentForm.getProject().getSecureProject().get().registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		PermissionForm permissionForm = context.newObject(PermissionForm.class);
 		permissionForm.setConsentForm(consentForm);
 		permissionForm.setEpisode(episode);		// normally we'd have to find episode from endorsements.
@@ -146,13 +145,15 @@ public class TestConsent extends _ModelTest {
 
 		// create a basic project and consent form
 		ConsentForm consentForm = createBasicConsentForm(context);
+		SecureProject sp = consentForm.getProject().getSecureProject().get();
+		String accessKey = sp.getAccessKey();
 		consentForm.setStatus(ConsentFormStatus.FINAL);
 
 		// the patient registers an account
 		SecurePatient spt = SecurePatient.getBuilder().setEmail(ExamplePatient.email).setPassword(ExamplePatient.password1).setName(ExamplePatient.name).build(context);
 		Project project = consentForm.getProject();
 		Endorsement endorsement = project.getAuthority().endorsePatient(spt.getPatient(), ExamplePatient.nnn, ExamplePatient.dateBirth);
-		Episode episode = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		Episode episode = sp.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		context.commitChanges();
 		// check that the defaults apply for this:
 		assertEquals(PermissionResponse.AGREE, episode.permissionFor("PARTICIPATE"));		// implicit
@@ -173,7 +174,8 @@ public class TestConsent extends _ModelTest {
 		
 		// now pretend we are a project that knows nothing except the patient details
 		// do we have permission to access this patient's information?
-		Episode e3 = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		SecureProject sp2 = SecureProject.performLogin(sp.getProject(), accessKey);
+		Episode e3 = sp2.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		assertEquals(episode.getObjectId(), e3.getObjectId());		// we haven't created a duplicate episode
 		assertEquals(PermissionResponse.AGREE, e3.permissionFor("PARTICIPATE"));
 		assertEquals(PermissionResponse.AGREE, e3.permissionFor("COMMUNICATION"));
@@ -192,7 +194,7 @@ public class TestConsent extends _ModelTest {
 			perm.setResponse(PermissionResponse.DISAGREE);		// disagree to everything
 			perm.setPermissionForm(permissionForm2);
 		});
-		Episode e5 = project.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
+		Episode e5 = sp.registerPatientToProject(ExamplePatient.nnn, ExamplePatient.dateBirth);
 		assertEquals(PermissionResponse.DISAGREE, e5.permissionFor("PARTICIPATE"));
 		assertEquals(PermissionResponse.DISAGREE, e5.permissionFor("COMMUNICATION"));
 		context.commitChanges();
@@ -213,9 +215,7 @@ public class TestConsent extends _ModelTest {
 		Authority authority = context.newObject(Authority.class);
 		authority.setName("NHS");
 		authority.setLogic(AuthorityLogic.UK_NHS);
-		Project p1 = context.newObject(Project.class);
-		p1.setTitle("Project title");
-		p1.setAuthority(authority);
+		Project p1 = authority.createProject("PROJECT", "Project title");
 
 		ConsentForm consentForm = context.newObject(ConsentForm.class);
 		ConsentItem item1 = createParticipateConsentItem(context, 1);
